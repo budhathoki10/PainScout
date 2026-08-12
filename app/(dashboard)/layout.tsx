@@ -12,6 +12,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       projects={projects}
       userName={session!.user.name ?? "Account"}
       userEmail={session!.user.email ?? ""}
+      userImage={session!.user.image ?? null}
     >
       {children}
     </DashboardShell>
