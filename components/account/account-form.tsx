@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { Loader2, Trash2 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,17 +29,68 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import type { AccountInfo } from "@/lib/types";
 
 const TIMEZONES = [
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
   "UTC",
+  "America/Los_Angeles",
+  "America/Denver",
+  "America/Chicago",
+  "America/New_York",
+  "America/Toronto",
+  "America/Mexico_City",
+  "America/Sao_Paulo",
   "Europe/London",
+  "Europe/Dublin",
+  "Europe/Lisbon",
+  "Europe/Madrid",
+  "Europe/Paris",
   "Europe/Berlin",
+  "Europe/Amsterdam",
+  "Europe/Rome",
+  "Europe/Warsaw",
+  "Europe/Athens",
+  "Europe/Istanbul",
+  "Europe/Moscow",
+  "Africa/Lagos",
+  "Africa/Cairo",
+  "Africa/Johannesburg",
+  "Africa/Nairobi",
+  "Asia/Dubai",
+  "Asia/Karachi",
   "Asia/Kolkata",
+  "Asia/Kathmandu",
+  "Asia/Dhaka",
+  "Asia/Bangkok",
+  "Asia/Jakarta",
   "Asia/Singapore",
+  "Asia/Hong_Kong",
+  "Asia/Shanghai",
+  "Asia/Tokyo",
+  "Asia/Seoul",
+  "Asia/Manila",
+  "Australia/Perth",
+  "Australia/Brisbane",
   "Australia/Sydney",
-];
+  "Pacific/Auckland",
+  "Pacific/Honolulu",
+].sort((a, b) => a.localeCompare(b));
+
+// Computed live via Intl (DST-aware) rather than hardcoded offsets, so it's
+// always correct for the current date — fixed offsets go stale twice a year
+// for zones that observe daylight saving.
+function getUtcOffsetLabel(timeZone: string): string {
+  const part = new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "shortOffset" })
+    .formatToParts(new Date())
+    .find((p) => p.type === "timeZoneName");
+  return part?.value.replace("GMT", "UTC") ?? "";
+}
+
+function getCurrentTimeLabel(timeZone: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date());
+}
 
 export function AccountForm({ account }: { account: AccountInfo }) {
   const [name, setName] = useState(account.name);
@@ -57,11 +108,22 @@ export function AccountForm({ account }: { account: AccountInfo }) {
 
   async function handleSave() {
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setSaving(false);
-    toast.success("Account settings saved", {
-      description: "Demo build — changes aren't persisted after a refresh.",
-    });
+    try {
+      const res = await fetch("/api/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), timezone, emailDigestOn }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to save");
+      toast.success("Account settings saved");
+    } catch (err) {
+      toast.error("Couldn't save account settings", {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleDelete() {
@@ -81,6 +143,7 @@ export function AccountForm({ account }: { account: AccountInfo }) {
         <CardContent className="space-y-5">
           <div className="flex items-center gap-4">
             <Avatar className="size-14">
+              {account.image && <AvatarImage src={account.image} alt={name} />}
               <AvatarFallback className="bg-primary/15 text-lg font-medium text-primary">
                 {initials}
               </AvatarFallback>
@@ -120,18 +183,22 @@ export function AccountForm({ account }: { account: AccountInfo }) {
           <div className="space-y-1.5">
             <Label>Timezone</Label>
             <Select value={timezone} onValueChange={(v) => v && setTimezone(v)}>
-              <SelectTrigger className="w-full sm:w-72">
-                <SelectValue>{(v: string) => v.replace("_", " ")}</SelectValue>
+              <SelectTrigger className="w-full sm:w-80">
+                <SelectValue>
+                  {(v: string) => `${v.replaceAll("_", " ")} (${getUtcOffsetLabel(v)})`}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {TIMEZONES.map((tz) => (
                   <SelectItem key={tz} value={tz}>
-                    {tz.replace("_", " ")}
+                    {tz.replaceAll("_", " ")} ({getUtcOffsetLabel(tz)})
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">Digest delivery times are shown in this timezone.</p>
+            <p className="text-xs text-muted-foreground">
+              Digest delivery times are shown in this timezone. Current time there: {getCurrentTimeLabel(timezone)}.
+            </p>
           </div>
         </CardContent>
       </Card>

@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarContent } from "@/components/dashboard/sidebar-content";
 import type { Project } from "@/lib/types";
@@ -21,9 +21,10 @@ interface TopbarProps {
   projects: Project[];
   userName: string;
   userEmail: string;
+  userImage: string | null;
 }
 
-export function Topbar({ projects, userName, userEmail }: TopbarProps) {
+export function Topbar({ projects, userName, userEmail, userImage }: TopbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const initials = userName
     .split(" ")
@@ -57,6 +58,7 @@ export function Topbar({ projects, userName, userEmail }: TopbarProps) {
               aria-label="Account menu"
             >
               <Avatar className="size-8">
+                {userImage && <AvatarImage src={userImage} alt={userName} />}
                 <AvatarFallback className="bg-primary/15 text-xs font-medium text-primary">
                   {initials || <UserIcon className="size-4" />}
                 </AvatarFallback>
