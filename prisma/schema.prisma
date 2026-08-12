@@ -1,0 +1,138 @@
+// Reddit Pain Scout — data model
+// MongoDB via Prisma. Requires DATABASE_URL (MongoDB connection string) to migrate/run.
+// See lib/prisma.ts for why this is safe to leave unconfigured in the demo build.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum DigestFrequency {
+  DAILY
+  TWICE_DAILY
+}
+
+enum LeadStatus {
+  NEW
+  USEFUL
+  NOT_RELEVANT
+  CONTACTED
+}
+
+enum PlanTier {
+  FREE
+  PRO
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  timezone      String    @default("UTC")
+  emailDigestOn Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts     Account[]
+  projects     Project[]
+  subscription Subscription?
+}
+
+// Auth.js (NextAuth) Prisma adapter model — links OAuth accounts (Google) to a User.
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Project {
+  id            String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String           @db.ObjectId
+  name          String
+  subreddits    String[]
+  keywords      String[]
+  frequency     DigestFrequency  @default(DAILY)
+  deliveryHour  Int              @default(8)
+  paused        Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  leads      Lead[]
+  digestLogs DigestLog[]
+
+  @@index([userId])
+}
+
+model Lead {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  projectId  String     @db.ObjectId
+  redditId   String
+  subreddit  String
+  title      String
+  snippet    String
+  url        String
+  author     String
+  score      Float
+  status     LeadStatus @default(NEW)
+  matchedOn  String[]
+  createdAt  DateTime   @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Deduplication: a given Reddit post is only ever stored once per project.
+  @@unique([projectId, redditId])
+  @@index([projectId, createdAt])
+}
+
+model DigestLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId String   @db.ObjectId
+  sentAt    DateTime @default(now())
+  leadCount Int
+  opened    Boolean  @default(false)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, sentAt])
+}
+
+model Subscription {
+  id                   String              @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String              @unique @db.ObjectId
+  plan                 PlanTier            @default(FREE)
+  status               SubscriptionStatus  @default(ACTIVE)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
