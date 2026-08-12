@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Check } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getBillingInfo } from "@/lib/data/billing";
+import { getFreemiusCheckoutConfig } from "@/lib/freemius";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -22,6 +23,7 @@ export default async function BillingPage() {
   const session = await auth();
   const billing = await getBillingInfo(session!.user.id);
   const isPro = billing.plan === "PRO";
+  const checkoutConfig = getFreemiusCheckoutConfig();
 
   const usageRows = [
     { label: "Projects", used: billing.usage.projects, limit: billing.limits.projects },
@@ -51,7 +53,13 @@ export default async function BillingPage() {
               {isPro ? "Billed monthly · manage or cancel anytime" : "Free forever, upgrade anytime"}
             </CardDescription>
           </div>
-          {!isPro && <UpgradeButton />}
+          {!isPro && (
+            <UpgradeButton
+              config={checkoutConfig}
+              userName={session!.user.name ?? undefined}
+              userEmail={session!.user.email ?? undefined}
+            />
+          )}
         </CardHeader>
         <CardContent className="space-y-5">
           {usageRows.map((row) => {
@@ -109,7 +117,14 @@ export default async function BillingPage() {
                 </li>
               ))}
             </ul>
-            {!isPro && <UpgradeButton className="w-full" />}
+            {!isPro && (
+              <UpgradeButton
+                config={checkoutConfig}
+                userName={session!.user.name ?? undefined}
+                userEmail={session!.user.email ?? undefined}
+                className="w-full"
+              />
+            )}
           </CardContent>
         </Card>
       </div>

@@ -10,7 +10,7 @@ import type {
 /**
  * Seeded demo dataset. This is what every page reads in the demo build
  * (see lib/data/*.ts). It exists purely so the product is fully clickable
- * without a live MongoDB / Reddit / Resend / Stripe connection.
+ * without a live MongoDB / Reddit / Resend / Freemius connection.
  */
 
 const hoursAgo = (h: number) => new Date(Date.now() - h * 60 * 60 * 1000).toISOString();
