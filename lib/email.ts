@@ -18,7 +18,7 @@ export interface SendDigestArgs {
 
 export async function sendDigestEmail({ to, projectName, leads, dashboardUrl }: SendDigestArgs) {
   const resend = getResendClient();
-  const from = process.env.RESEND_FROM_EMAIL ?? "Reddit Pain Scout <digest@resend.dev>";
+  const from = process.env.RESEND_FROM_EMAIL ?? "Pain Scout <digest@resend.dev>";
 
   return resend.emails.send({
     from,

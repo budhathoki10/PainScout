@@ -2,7 +2,7 @@ import { Clock, Filter, Radar, Zap } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { Counter } from "@/components/motion/counter";
 import { Marquee } from "@/components/motion/marquee";
-import { POPULAR_SUBREDDITS } from "@/lib/popular-subreddits";
+import { EXAMPLE_KEYWORDS } from "@/lib/example-keywords";
 
 export function ValueStrip() {
   return (
@@ -21,7 +21,7 @@ export function ValueStrip() {
               <Counter to={15} suffix="+ hrs/week" />
             </p>
             <p className="mt-1.5 max-w-sm text-sm text-muted-foreground text-pretty">
-              Reported time founders lose to manually scrolling subreddits, hunting for the right complaint.
+              Reported time founders lose to manually scrolling Bluesky, hunting for the right complaint.
             </p>
             <Radar className="pointer-events-none absolute -right-6 -bottom-6 size-28 text-primary/[0.06]" strokeWidth={1} />
           </div>
@@ -33,7 +33,7 @@ export function ValueStrip() {
             <p className="mt-4 text-3xl font-semibold tracking-tight">
               <Counter to={20} suffix="+" />
             </p>
-            <p className="mt-1.5 text-sm text-muted-foreground text-pretty">Subreddits watched at once</p>
+            <p className="mt-1.5 text-sm text-muted-foreground text-pretty">Keywords watched at once</p>
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-6">
@@ -54,11 +54,11 @@ export function ValueStrip() {
                 </span>
                 <div>
                   <p className="text-sm font-semibold">Watching right now</p>
-                  <p className="text-sm text-muted-foreground">A sample of subreddits founders track with Pain Scout</p>
+                  <p className="text-sm text-muted-foreground">A sample of keywords founders track with Pain Scout</p>
                 </div>
               </div>
             </div>
-            <Marquee items={POPULAR_SUBREDDITS} className="mt-5" />
+            <Marquee items={EXAMPLE_KEYWORDS} className="mt-5" />
           </div>
         </Reveal>
       </div>

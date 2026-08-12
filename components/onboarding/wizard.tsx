@@ -2,25 +2,45 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, PartyPopper } from "lucide-react";
+import { toast } from "sonner";
+import { ArrowLeft, ArrowRight, Check, Loader2, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { SubredditPicker } from "@/components/onboarding/subreddit-picker";
 import { TagInput } from "@/components/tag-input";
 import { cn } from "@/lib/utils";
 
-const STEPS = ["Name your project", "Pick subreddits", "Add keywords"];
+const STEPS = ["Name your project", "Add keywords"];
 
 export function OnboardingWizard() {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
-  const [subreddits, setSubreddits] = useState<string[]>([]);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const canAdvance = [name.trim().length > 1, subreddits.length > 0, keywords.length > 0][step];
+  const canAdvance = [name.trim().length > 1, keywords.length > 0][step];
+
+  async function handleFinish() {
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), keywords }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to create project");
+      setDone(true);
+    } catch (err) {
+      toast.error("Couldn't create project", {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   if (done) {
     return (
@@ -31,14 +51,9 @@ export function OnboardingWizard() {
           </span>
           <h1 className="mt-6 text-xl font-semibold">You&apos;re all set, {name || "founder"}</h1>
           <p className="mt-2 max-w-xs text-sm text-pretty text-muted-foreground">
-            Your first digest for <span className="font-medium text-foreground">{name}</span> arrives
-            tomorrow at 8 AM. We&apos;ll scan {subreddits.length} subreddit
-            {subreddits.length === 1 ? "" : "s"} for {keywords.length} tracked keyword
-            {keywords.length === 1 ? "" : "s"}.
-          </p>
-          <p className="mt-3 rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
-            Demo build — this project preview isn&apos;t saved. Your dashboard shows sample projects
-            already loaded with leads so you can explore the full product right now.
+            <span className="font-medium text-foreground">{name}</span> is now tracking {keywords.length}{" "}
+            keyword{keywords.length === 1 ? "" : "s"} on Bluesky. Your first digest arrives tomorrow at 8 AM
+            — or trigger a scan manually any time.
           </p>
           <Button className="mt-6 gap-2" asChild>
             <Link href="/dashboard">
@@ -95,14 +110,6 @@ export function OnboardingWizard() {
 
           {step === 1 && (
             <div className="space-y-2">
-              <Label>Which subreddits should we watch?</Label>
-              <SubredditPicker value={subreddits} onChange={setSubreddits} />
-              <p className="text-xs text-muted-foreground">Pick at least one. You can add more later.</p>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="space-y-2">
               <Label>What keywords or phrases represent the pain point?</Label>
               <TagInput
                 value={keywords}
@@ -110,7 +117,8 @@ export function OnboardingWizard() {
                 placeholder="Type a keyword and press Enter…"
               />
               <p className="text-xs text-muted-foreground">
-                e.g. &quot;invoicing&quot;, &quot;late payment&quot;, &quot;chasing payment&quot;
+                e.g. &quot;invoicing&quot;, &quot;late payment&quot;, &quot;chasing payment&quot; — we&apos;ll
+                search Bluesky for posts matching these.
               </p>
             </div>
           )}
@@ -122,7 +130,7 @@ export function OnboardingWizard() {
           type="button"
           variant="ghost"
           className="gap-1.5"
-          disabled={step === 0}
+          disabled={step === 0 || submitting}
           onClick={() => setStep((s) => Math.max(0, s - 1))}
         >
           <ArrowLeft className="size-4" /> Back
@@ -130,11 +138,12 @@ export function OnboardingWizard() {
         <Button
           type="button"
           className="gap-1.5"
-          disabled={!canAdvance}
-          onClick={() => (step === STEPS.length - 1 ? setDone(true) : setStep((s) => s + 1))}
+          disabled={!canAdvance || submitting}
+          onClick={() => (step === STEPS.length - 1 ? handleFinish() : setStep((s) => s + 1))}
         >
+          {submitting && <Loader2 className="size-4 animate-spin" />}
           {step === STEPS.length - 1 ? "Finish setup" : "Continue"}
-          <ArrowRight className="size-4" />
+          {!submitting && <ArrowRight className="size-4" />}
         </Button>
       </div>
     </div>

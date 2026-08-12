@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
-import { fetchNewPostsForSubreddits } from "@/lib/reddit";
+import { searchMultipleKeywords } from "@/lib/bluesky";
 import { filterPosts } from "@/lib/filter";
 import { rankForDigest } from "@/lib/digest";
 import { sendDigestEmail } from "@/lib/email";
@@ -9,12 +9,12 @@ export const dynamic = "force-dynamic";
 
 /**
  * Full production pipeline (spec Section 5-7): dedupe against stored
- * redditIds -> pain filter -> rank -> persist -> email.
+ * postUris -> pain filter -> rank -> persist -> email.
  *
  * Triggered daily by an external scheduler (cron-job.org) calling this route
  * with `Authorization: Bearer $CRON_SECRET`. Requires DATABASE_URL,
- * REDDIT_CLIENT_ID/SECRET, and RESEND_API_KEY to actually run — the demo UI
- * never calls this route, it reads lib/mock-data.ts instead.
+ * BLUESKY_HANDLE/BLUESKY_APP_PASSWORD, and RESEND_API_KEY to actually run —
+ * the demo UI never calls this route, it reads lib/mock-data.ts instead.
  */
 export async function POST(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
@@ -39,19 +39,19 @@ export async function POST(req: NextRequest) {
 
   for (const project of projects) {
     try {
-      const posts = await fetchNewPostsForSubreddits(project.subreddits);
+      const posts = await searchMultipleKeywords(project.keywords);
       const scored = filterPosts(posts, project.keywords);
       const ranked = rankForDigest(scored);
 
-      const existingIds = new Set(
+      const existingUris = new Set(
         (
           await prisma.lead.findMany({
-            where: { projectId: project.id, redditId: { in: ranked.map((l) => l.redditId) } },
-            select: { redditId: true },
+            where: { projectId: project.id, postUri: { in: ranked.map((l) => l.postUri) } },
+            select: { postUri: true },
           })
-        ).map((l) => l.redditId),
+        ).map((l) => l.postUri),
       );
-      const freshLeads = ranked.filter((l) => !existingIds.has(l.redditId));
+      const freshLeads = ranked.filter((l) => !existingUris.has(l.postUri));
 
       if (freshLeads.length === 0) {
         results.push({ project: project.name, sent: false, newLeads: 0 });
@@ -61,12 +61,10 @@ export async function POST(req: NextRequest) {
       await prisma.lead.createMany({
         data: freshLeads.map((l) => ({
           projectId: project.id,
-          redditId: l.redditId,
-          subreddit: l.subreddit,
-          title: l.title,
-          snippet: l.snippet,
+          postUri: l.postUri,
+          authorHandle: l.authorHandle,
+          text: l.text,
           url: l.url,
-          author: l.author,
           score: l.score,
           matchedOn: l.matchedOn,
         })),

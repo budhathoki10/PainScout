@@ -25,7 +25,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { SubredditPicker } from "@/components/onboarding/subreddit-picker";
 import { TagInput } from "@/components/tag-input";
 import type { Project } from "@/lib/types";
 
@@ -34,7 +33,6 @@ const HOURS = Array.from({ length: 24 }, (_, h) => h);
 export function ProjectSettingsForm({ project }: { project: Project }) {
   const router = useRouter();
   const [name, setName] = useState(project.name);
-  const [subreddits, setSubreddits] = useState(project.subreddits);
   const [keywords, setKeywords] = useState(project.keywords);
   const [frequency, setFrequency] = useState(project.frequency);
   const [deliveryHour, setDeliveryHour] = useState(project.deliveryHour);
@@ -70,11 +68,6 @@ export function ProjectSettingsForm({ project }: { project: Project }) {
           <div className="space-y-1.5">
             <Label htmlFor="settings-name">Project name</Label>
             <Input id="settings-name" value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label>Tracked subreddits</Label>
-            <SubredditPicker value={subreddits} onChange={setSubreddits} />
           </div>
 
           <div className="space-y-1.5">

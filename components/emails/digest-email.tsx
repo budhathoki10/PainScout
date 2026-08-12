@@ -12,9 +12,8 @@ import {
 } from "@react-email/components";
 
 export interface DigestEmailLead {
-  subreddit: string;
-  title: string;
-  snippet: string;
+  authorHandle: string;
+  text: string;
   url: string;
   score: number;
 }
@@ -39,7 +38,7 @@ export default function DigestEmail({ projectName, leads, dashboardUrl }: Digest
       <Body style={{ backgroundColor: "#f4f4f5", fontFamily: "Helvetica, Arial, sans-serif", margin: 0, padding: "32px 0" }}>
         <Container style={{ backgroundColor: "#ffffff", borderRadius: 12, maxWidth: 560, padding: 32, margin: "0 auto" }}>
           <Text style={{ fontSize: 13, fontWeight: 700, color: ACCENT, letterSpacing: 0.4, textTransform: "uppercase", margin: "0 0 8px" }}>
-            Reddit Pain Scout
+            Pain Scout
           </Text>
           <Heading style={{ fontSize: 20, color: INK, margin: "0 0 4px" }}>
             {leads.length} new lead{leads.length === 1 ? "" : "s"} for {projectName}
@@ -51,15 +50,11 @@ export default function DigestEmail({ projectName, leads, dashboardUrl }: Digest
           {leads.map((lead, i) => (
             <Section key={i} style={{ marginBottom: 20 }}>
               <Text style={{ fontSize: 12, color: ACCENT, fontWeight: 600, margin: "0 0 4px" }}>
-                r/{lead.subreddit} · {lead.score}% match
+                @{lead.authorHandle} · {lead.score}% match
               </Text>
               <Link href={lead.url} style={{ fontSize: 15, fontWeight: 600, color: INK, textDecoration: "none" }}>
-                {lead.title}
+                {lead.text}
               </Link>
-              <Text style={{ fontSize: 14, color: MUTED, margin: "4px 0 0" }}>
-                {lead.snippet}
-                {lead.snippet.length >= 220 ? "…" : ""}
-              </Text>
               {i < leads.length - 1 && <Hr style={{ borderColor: BORDER, margin: "20px 0 0" }} />}
             </Section>
           ))}
@@ -81,7 +76,7 @@ export default function DigestEmail({ projectName, leads, dashboardUrl }: Digest
             Open dashboard
           </Link>
           <Text style={{ fontSize: 12, color: MUTED, marginTop: 24 }}>
-            You&apos;re receiving this because you have an active project on Reddit Pain Scout.
+            You&apos;re receiving this because you have an active project on Pain Scout.
           </Text>
         </Container>
       </Body>

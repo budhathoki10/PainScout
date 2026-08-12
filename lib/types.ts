@@ -7,7 +7,6 @@ export interface Project {
   id: string;
   userId: string;
   name: string;
-  subreddits: string[];
   keywords: string[];
   frequency: DigestFrequency;
   deliveryHour: number;
@@ -18,12 +17,10 @@ export interface Project {
 export interface Lead {
   id: string;
   projectId: string;
-  redditId: string;
-  subreddit: string;
-  title: string;
-  snippet: string;
+  postUri: string;
+  authorHandle: string;
+  text: string;
   url: string;
-  author: string;
   score: number;
   status: LeadStatus;
   matchedOn: string[];
@@ -51,12 +48,12 @@ export interface BillingInfo {
   renewsOn: string | null;
   limits: {
     projects: number;
-    subredditsPerProject: number;
+    keywordsPerProject: number;
     scansPerDay: number;
   };
   usage: {
     projects: number;
-    maxSubredditsInAnyProject: number;
+    maxKeywordsInProject: number;
     scansToday: number;
   };
 }

@@ -13,9 +13,9 @@ export function ProjectHeader({ project }: { project: Project }) {
           {project.paused && <Badge variant="outline">Paused</Badge>}
         </div>
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {project.subreddits.map((s) => (
-            <Badge key={s} variant="secondary" className="rounded-full text-xs font-normal">
-              r/{s}
+          {project.keywords.map((k) => (
+            <Badge key={k} variant="secondary" className="rounded-full text-xs font-normal">
+              {k}
             </Badge>
           ))}
         </div>

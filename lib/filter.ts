@@ -1,4 +1,4 @@
-import type { RawRedditPost } from "@/lib/reddit";
+import type { BlueskyPost } from "@/lib/bluesky";
 
 /**
  * Pain-point filtering: keyword scoring against tracked keywords plus a
@@ -48,15 +48,23 @@ const NOISE_PHRASES = [
 ];
 
 export interface ScoredLead {
-  post: RawRedditPost;
+  post: BlueskyPost;
   score: number;
   matchedKeywords: string[];
 }
 
 const MIN_SCORE_THRESHOLD = 35;
 
-export function scorePost(post: RawRedditPost, keywords: string[]): ScoredLead | null {
-  const haystack = `${post.title}\n${post.selftext}`.toLowerCase();
+// Bluesky search can surface old posts the first time a keyword matches
+// them — this isn't a "find it right now" signal at that point, so anything
+// older than this is treated as noise regardless of how well it scores.
+const MAX_POST_AGE_DAYS = 7;
+
+export function scorePost(post: BlueskyPost, keywords: string[]): ScoredLead | null {
+  const ageMs = Date.now() - new Date(post.createdAt).getTime();
+  if (ageMs > MAX_POST_AGE_DAYS * 24 * 60 * 60 * 1000) return null;
+
+  const haystack = post.text.toLowerCase();
 
   const matchedKeywords = keywords.filter((k) => haystack.includes(k.toLowerCase()));
   if (matchedKeywords.length === 0) return null;
@@ -68,8 +76,7 @@ export function scorePost(post: RawRedditPost, keywords: string[]): ScoredLead |
   score += matchedKeywords.length * 20; // each distinct keyword hit
   score += PAIN_PHRASES.filter((p) => haystack.includes(p)).length * 12;
   if (haystack.includes("?")) score += 5; // questions skew toward genuine asks
-  if (post.selftext.length > 200) score += 8; // detailed venting beats a one-liner
-  if (post.title.toLowerCase().includes(matchedKeywords[0].toLowerCase())) score += 10; // keyword in title
+  if (post.text.length > 120) score += 8; // a fuller post beats a one-liner (Bluesky caps posts at 300 chars)
 
   score = Math.min(100, score);
   if (score < MIN_SCORE_THRESHOLD) return null;
@@ -77,7 +84,7 @@ export function scorePost(post: RawRedditPost, keywords: string[]): ScoredLead |
   return { post, score, matchedKeywords };
 }
 
-export function filterPosts(posts: RawRedditPost[], keywords: string[]): ScoredLead[] {
+export function filterPosts(posts: BlueskyPost[], keywords: string[]): ScoredLead[] {
   return posts
     .map((post) => scorePost(post, keywords))
     .filter((lead): lead is ScoredLead => lead !== null);

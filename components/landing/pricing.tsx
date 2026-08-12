@@ -13,7 +13,7 @@ const PLANS = [
     description: "Try it out on a single project.",
     features: [
       "1 tracked project",
-      "Up to 4 subreddits",
+      "Up to 5 keywords",
       "Daily digest email",
       "7-day lead history",
     ],
@@ -27,7 +27,7 @@ const PLANS = [
     description: "For founders running multiple products or niches.",
     features: [
       "Unlimited projects",
-      "Unlimited subreddits & keywords",
+      "Unlimited keywords",
       "Twice-daily digests",
       "Full lead history & analytics",
       "Priority support",

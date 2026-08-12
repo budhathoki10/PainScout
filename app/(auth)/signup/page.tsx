@@ -8,7 +8,7 @@ export default function SignupPage() {
   return (
     <AuthCard
       title="Create your account"
-      description="Start finding warm leads on Reddit in minutes."
+      description="Start finding warm leads on Bluesky in minutes."
       footerText="Already have an account?"
       footerLinkLabel="Log in"
       footerLinkHref="/login"

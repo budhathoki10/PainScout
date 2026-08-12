@@ -28,7 +28,7 @@ export function Hero() {
             className="mb-6 gap-1.5 rounded-full border-transparent bg-accent px-3 py-1 text-accent-foreground"
           >
             <span className="size-1.5 rounded-full bg-primary" />
-            Now watching Reddit for you
+            Now watching Bluesky for you
           </Badge>
 
           <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.25rem] lg:leading-[1.08]">
@@ -36,7 +36,7 @@ export function Hero() {
           </h1>
 
           <p className="mt-5 max-w-lg text-lg text-muted-foreground text-pretty">
-            Reddit Pain Scout watches the subreddits you choose, filters out the noise, and emails
+            Pain Scout watches Bluesky for the keywords you choose, filters out the noise, and emails
             you a ranked digest of people already complaining about the problem you solve.
           </p>
 

@@ -27,7 +27,7 @@ export default async function DashboardPage({
       <EmptyState
         icon={FolderPlus}
         title="No projects yet"
-        description="Create a project to start watching subreddits for pain points."
+        description="Create a project to start watching Bluesky for pain points."
         action={
           <Button asChild>
             <Link href="/onboarding">New project</Link>

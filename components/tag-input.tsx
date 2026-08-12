@@ -17,10 +17,20 @@ export function TagInput({ value, onChange, placeholder, className }: TagInputPr
   const [draft, setDraft] = useState("");
 
   function commit() {
-    const tag = draft.trim();
-    if (tag && !value.some((t) => t.toLowerCase() === tag.toLowerCase())) {
-      onChange([...value, tag]);
+    // Splits on commas so pasted or fast-typed "a, b, c" becomes three tags
+    // instead of one literal tag containing commas.
+    const parts = draft
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    const next = [...value];
+    for (const tag of parts) {
+      if (!next.some((t) => t.toLowerCase() === tag.toLowerCase())) {
+        next.push(tag);
+      }
     }
+    if (next.length !== value.length) onChange(next);
     setDraft("");
   }
 

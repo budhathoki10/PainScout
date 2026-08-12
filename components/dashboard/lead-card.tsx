@@ -36,7 +36,7 @@ export function LeadCard({ lead, updating, onStatusChange }: LeadCardProps) {
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-primary">r/{lead.subreddit}</span>
+          <span className="text-sm font-medium text-primary">@{lead.authorHandle}</span>
           <span className="text-xs text-muted-foreground">
             {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
           </span>
@@ -62,11 +62,10 @@ export function LeadCard({ lead, updating, onStatusChange }: LeadCardProps) {
         href={lead.url}
         target="_blank"
         rel="noreferrer"
-        className="mt-3 block text-[15px] leading-snug font-semibold text-balance hover:underline"
+        className="mt-3 block text-[15px] leading-relaxed font-medium text-balance hover:underline"
       >
-        {lead.title}
+        {lead.text}
       </a>
-      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground text-pretty">{lead.snippet}</p>
 
       {lead.matchedOn.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -111,7 +110,7 @@ export function LeadCard({ lead, updating, onStatusChange }: LeadCardProps) {
         </Button>
         <Button size="sm" variant="ghost" className="ml-auto h-8 gap-1.5 text-xs" asChild>
           <a href={lead.url} target="_blank" rel="noreferrer">
-            Open on Reddit <ExternalLink className="size-3.5" />
+            Open on Bluesky <ExternalLink className="size-3.5" />
           </a>
         </Button>
       </div>

@@ -13,25 +13,25 @@ import type { Lead, LeadStatus } from "@/lib/types";
 export function LeadFeed({ initialLeads }: { initialLeads: Lead[] }) {
   const [leads, setLeads] = useState(initialLeads);
   const [status, setStatus] = useState<StatusFilter>("ALL");
-  const [subreddit, setSubreddit] = useState("ALL");
+  const [keyword, setKeyword] = useState("ALL");
   const [sort, setSort] = useState<SortOption>("recent");
   const [pendingId, setPendingId] = useState<string | null>(null);
 
-  const subreddits = useMemo(
-    () => Array.from(new Set(initialLeads.map((l) => l.subreddit))).sort(),
+  const keywords = useMemo(
+    () => Array.from(new Set(initialLeads.flatMap((l) => l.matchedOn))).sort(),
     [initialLeads],
   );
 
   const visibleLeads = useMemo(() => {
     let result = leads;
     if (status !== "ALL") result = result.filter((l) => l.status === status);
-    if (subreddit !== "ALL") result = result.filter((l) => l.subreddit === subreddit);
+    if (keyword !== "ALL") result = result.filter((l) => l.matchedOn.includes(keyword));
     return [...result].sort((a, b) =>
       sort === "score"
         ? b.score - a.score
         : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-  }, [leads, status, subreddit, sort]);
+  }, [leads, status, keyword, sort]);
 
   const gridRef = useRef<HTMLDivElement>(null);
   // Signature (not the array reference) so a status click on one card doesn't
@@ -80,11 +80,11 @@ export function LeadFeed({ initialLeads }: { initialLeads: Lead[] }) {
   return (
     <div className="space-y-5">
       <FilterBar
-        subreddits={subreddits}
+        keywords={keywords}
         status={status}
         onStatusChange={setStatus}
-        subreddit={subreddit}
-        onSubredditChange={setSubreddit}
+        keyword={keyword}
+        onKeywordChange={setKeyword}
         sort={sort}
         onSortChange={setSort}
         resultCount={visibleLeads.length}
