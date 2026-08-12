@@ -25,7 +25,7 @@ This is a complete implementation of the spec's full end-state SaaS, but it ship
 | Reddit scanning (`lib/reddit.ts`) | Not called by the UI | Fully implemented against Reddit's OAuth2 API via `snoowrap` |
 | Pain-point filter (`lib/filter.ts`) | — | Real keyword + heuristic scoring, runs whenever the cron route runs |
 | Digest email (`lib/email.ts`, `components/emails/digest-email.tsx`) | Not sent | Sends via Resend once `RESEND_API_KEY` is set |
-| Billing (`lib/stripe.ts`, `/api/stripe/*`) | Upgrade button shows a toast explaining it's not configured | Real Stripe Checkout + webhook once Stripe keys are set |
+| Billing (`lib/freemius.ts`, `/api/freemius/*`) | Upgrade button shows a toast explaining it's not configured | Real Freemius Checkout + webhook once Freemius keys are set |
 | `/api/cron/digest` | Returns 500 (no `DATABASE_URL`) | Runs the full pipeline: fetch → dedupe → filter → rank → persist → email |
 
 Nothing here is a stub pretending to be real — the pipeline code is production-shaped
@@ -39,7 +39,7 @@ call it until then.
 3. **Reddit**: create a "script" app at https://www.reddit.com/prefs/apps, set `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET`.
 4. **Email**: create a Resend account, set `RESEND_API_KEY` and a verified `RESEND_FROM_EMAIL`.
 5. **Google OAuth**: create an OAuth client in Google Cloud Console, set `GOOGLE_CLIENT_ID`/`SECRET`, and set `NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED=true`.
-6. **Billing**: create a Stripe product/price, set `STRIPE_SECRET_KEY`, `STRIPE_PRO_PRICE_ID`, and `STRIPE_WEBHOOK_SECRET` (from `stripe listen` or your webhook endpoint config).
+6. **Billing**: create a Freemius product/plan, set `FREEMIUS_PRODUCT_ID`, `FREEMIUS_PUBLIC_KEY`, `FREEMIUS_PRO_PLAN_ID`, and `FREEMIUS_SECRET_KEY` (used to verify webhook signatures), then point a webhook at `/api/freemius/webhook`.
 7. **Scheduling**: deploy to Vercel, set `CRON_SECRET`, then point a cron-job.org job at `POST https://your-app.vercel.app/api/cron/digest` with header `Authorization: Bearer <CRON_SECRET>`.
 
 Once `DATABASE_URL` is set, swap the mock branch in each `lib/data/*.ts` function for
@@ -49,13 +49,13 @@ never need to change.
 ## Stack
 
 Next.js 15 (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui · Auth.js (NextAuth v5)
-· MongoDB + Prisma · snoowrap (Reddit OAuth2) · Resend + React Email · Stripe · Recharts
+· MongoDB + Prisma · snoowrap (Reddit OAuth2) · Resend + React Email · Freemius · Recharts
 
 ## Project structure
 
 ```
-app/                  routes (App Router), incl. api/cron/digest, api/stripe/*, api/auth/*
-lib/                  reddit.ts, filter.ts, digest.ts, email.ts, stripe.ts, auth.ts, prisma.ts
+app/                  routes (App Router), incl. api/cron/digest, api/freemius/*, api/auth/*
+lib/                  reddit.ts, filter.ts, digest.ts, email.ts, freemius.ts, auth.ts, prisma.ts
 lib/data/              data-access layer (mock today, Prisma-ready)
 lib/mock-data.ts       seeded demo dataset
 components/            ui/ (shadcn), landing/, dashboard/, onboarding/, billing/, account/, emails/
