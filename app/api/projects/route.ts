@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { getEffectivePlan, getPlanLimits } from "@/lib/plan-limits";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -28,6 +29,25 @@ export async function POST(req: NextRequest) {
   }
 
   const prisma = getPrisma();
+  const [plan, projectCount] = await Promise.all([
+    getEffectivePlan(session.user.id),
+    prisma.project.count({ where: { userId: session.user.id } }),
+  ]);
+  const limits = getPlanLimits(plan);
+
+  if (projectCount >= limits.projects) {
+    return NextResponse.json(
+      { error: `Your plan allows up to ${limits.projects} project${limits.projects === 1 ? "" : "s"}. Upgrade to Pro to add more.` },
+      { status: 403 },
+    );
+  }
+  if (keywords.length > limits.keywordsPerProject) {
+    return NextResponse.json(
+      { error: `Your plan allows up to ${limits.keywordsPerProject} keywords per project. Upgrade to Pro for unlimited keywords.` },
+      { status: 403 },
+    );
+  }
+
   const project = await prisma.project.create({
     data: { userId: session.user.id, name, keywords },
   });

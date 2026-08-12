@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { scanProjectForLeads } from "@/lib/scan";
 import { sendDigestEmail } from "@/lib/email";
+import { canScanToday } from "@/lib/plan-limits";
 
 export const dynamic = "force-dynamic";
 
@@ -75,12 +76,23 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
+        // Scoped to CRON entries only — a manual "Scrape now" click shouldn't
+        // block the scheduled run for this slot from firing.
         const recentLog = await prisma.digestLog.findFirst({
-          where: { projectId: project.id },
+          where: { projectId: project.id, source: "CRON" },
           orderBy: { sentAt: "desc" },
         });
         if (recentLog && Date.now() - recentLog.sentAt.getTime() < RECENT_SEND_GUARD_MS) {
           results.push({ project: project.name, scheduled: false, reason: "already ran this delivery window" });
+          continue;
+        }
+
+        // Defensive: covers a plan downgrade mid-cycle leaving a project
+        // configured for more scans/day than the user's current plan allows.
+        // Manual scrapes draw from the same daily budget (lib/plan-limits.ts).
+        const scanLimit = await canScanToday(project.userId);
+        if (!scanLimit.allowed) {
+          results.push({ project: project.name, scheduled: false, reason: "daily scan limit reached" });
           continue;
         }
       }
@@ -103,7 +115,7 @@ export async function POST(req: NextRequest) {
       }
 
       await prisma.digestLog.create({
-        data: { projectId: project.id, leadCount: freshLeads.length, opened: false },
+        data: { projectId: project.id, leadCount: freshLeads.length, opened: false, source: "CRON" },
       });
 
       results.push({ project: project.name, sent: project.user.emailDigestOn, newLeads: freshLeads.length });

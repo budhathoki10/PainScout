@@ -1,39 +1,34 @@
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { mockAccount, mockBilling } from "@/lib/mock-data";
+import { planFromSubscription } from "@/lib/entitlements";
+import { countScansToday, getPlanLimits } from "@/lib/plan-limits";
 import type { AccountInfo, BillingInfo, PlanTier } from "@/lib/types";
-
-const PLAN_LIMITS: Record<PlanTier, BillingInfo["limits"]> = {
-  FREE: { projects: 1, keywordsPerProject: 5, scansPerDay: 1 },
-  PRO: { projects: 999, keywordsPerProject: 999, scansPerDay: 2 },
-};
 
 export async function getBillingInfo(userId: string): Promise<BillingInfo> {
   if (!isDatabaseConfigured()) return mockBilling;
 
   const prisma = getPrisma();
-  const [subscription, projects] = await Promise.all([
+  const [subscription, projects, scansToday] = await Promise.all([
     prisma.subscription.findUnique({ where: { userId } }),
     prisma.project.findMany({ where: { userId }, select: { keywords: true } }),
+    countScansToday(userId),
   ]);
 
-  const plan: PlanTier = subscription?.plan ?? "FREE";
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  const scannedToday = await prisma.digestLog.count({
-    where: { project: { userId }, sentAt: { gte: todayStart } },
-  });
+  // Never trust the stored plan/status alone — see lib/entitlements.ts for
+  // why this has to be a live check against currentPeriodEnd.
+  const plan: PlanTier = planFromSubscription(subscription);
 
   return {
     plan,
     status: subscription?.status ?? "ACTIVE",
     renewsOn: subscription?.currentPeriodEnd?.toISOString() ?? null,
-    limits: PLAN_LIMITS[plan],
+    limits: getPlanLimits(plan),
     usage: {
       projects: projects.length,
       maxKeywordsInProject: projects.length
         ? Math.max(...projects.map((p) => p.keywords.length))
         : 0,
-      scansToday: scannedToday > 0 ? 1 : 0,
+      scansToday,
     },
   };
 }

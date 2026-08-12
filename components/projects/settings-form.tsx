@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Lock, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -26,14 +27,22 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TagInput } from "@/components/tag-input";
-import type { Project } from "@/lib/types";
+import type { BillingInfo, Project } from "@/lib/types";
 
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
 
-export function ProjectSettingsForm({ project }: { project: Project }) {
+export function ProjectSettingsForm({
+  project,
+  isPro,
+  limits,
+}: {
+  project: Project;
+  isPro: boolean;
+  limits: BillingInfo["limits"];
+}) {
   const router = useRouter();
   const [name, setName] = useState(project.name);
-  const [keywords, setKeywords] = useState(project.keywords);
+  const [keywords, setKeywords] = useState(project.keywords ?? []);
   const [frequency, setFrequency] = useState(project.frequency);
   const [deliveryHour, setDeliveryHour] = useState(project.deliveryHour);
   const [paused, setPaused] = useState(project.paused);
@@ -91,8 +100,25 @@ export function ProjectSettingsForm({ project }: { project: Project }) {
           </div>
 
           <div className="space-y-1.5">
-            <Label>Tracked keywords</Label>
-            <TagInput value={keywords} onChange={setKeywords} placeholder="Add a keyword…" />
+            <div className="flex items-center justify-between">
+              <Label>Tracked keywords</Label>
+              {!isPro && (
+                <span className="text-xs text-muted-foreground">
+                  {keywords.length} / {limits.keywordsPerProject}
+                </span>
+              )}
+            </div>
+            <TagInput
+              value={keywords}
+              onChange={setKeywords}
+              placeholder="Add a keyword…"
+              maxTags={isPro ? undefined : limits.keywordsPerProject}
+            />
+            {!isPro && keywords.length >= limits.keywordsPerProject && (
+              <p className="text-xs text-muted-foreground">
+                Free plan limit reached. Upgrade to Pro for unlimited keywords.
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -114,7 +140,17 @@ export function ProjectSettingsForm({ project }: { project: Project }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="DAILY">Daily</SelectItem>
-                  <SelectItem value="TWICE_DAILY">Twice daily</SelectItem>
+                  <SelectItem value="TWICE_DAILY" disabled={!isPro}>
+                    <span className="flex items-center gap-1.5">
+                      Twice daily
+                      {!isPro && (
+                        <Badge variant="secondary" className="gap-1 text-[10px]">
+                          <Lock className="size-2.5" />
+                          Pro
+                        </Badge>
+                      )}
+                    </span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

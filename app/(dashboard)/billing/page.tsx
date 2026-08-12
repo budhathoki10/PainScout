@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Check } from "lucide-react";
+import { Check, ExternalLink } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getBillingInfo } from "@/lib/data/billing";
-import { getFreemiusCheckoutConfig } from "@/lib/freemius";
+import { isFreemiusConfigured } from "@/lib/freemius";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { UpgradeButton } from "@/components/billing/upgrade-button";
 
@@ -23,7 +24,7 @@ export default async function BillingPage() {
   const session = await auth();
   const billing = await getBillingInfo(session!.user.id);
   const isPro = billing.plan === "PRO";
-  const checkoutConfig = getFreemiusCheckoutConfig();
+  const freemiusConfigured = isFreemiusConfigured();
 
   const usageRows = [
     { label: "Projects", used: billing.usage.projects, limit: billing.limits.projects },
@@ -53,12 +54,15 @@ export default async function BillingPage() {
               {isPro ? "Billed monthly · manage or cancel anytime" : "Free forever, upgrade anytime"}
             </CardDescription>
           </div>
-          {!isPro && (
-            <UpgradeButton
-              config={checkoutConfig}
-              userName={session!.user.name ?? undefined}
-              userEmail={session!.user.email ?? undefined}
-            />
+          {isPro ? (
+            <Button variant="outline" size="sm" className="gap-1.5" asChild>
+              <a href="/api/billing/portal">
+                Manage subscription
+                <ExternalLink className="size-3.5" />
+              </a>
+            </Button>
+          ) : (
+            <UpgradeButton configured={freemiusConfigured} />
           )}
         </CardHeader>
         <CardContent className="space-y-5">
@@ -117,14 +121,7 @@ export default async function BillingPage() {
                 </li>
               ))}
             </ul>
-            {!isPro && (
-              <UpgradeButton
-                config={checkoutConfig}
-                userName={session!.user.name ?? undefined}
-                userEmail={session!.user.email ?? undefined}
-                className="w-full"
-              />
-            )}
+            {!isPro && <UpgradeButton configured={freemiusConfigured} className="w-full" />}
           </CardContent>
         </Card>
       </div>

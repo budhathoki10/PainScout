@@ -11,10 +11,13 @@ interface TagInputProps {
   onChange: (tags: string[]) => void;
   placeholder?: string;
   className?: string;
+  /** Caps how many tags can be added — extra input is silently dropped once reached. */
+  maxTags?: number;
 }
 
-export function TagInput({ value, onChange, placeholder, className }: TagInputProps) {
+export function TagInput({ value, onChange, placeholder, className, maxTags }: TagInputProps) {
   const [draft, setDraft] = useState("");
+  const atLimit = maxTags !== undefined && value.length >= maxTags;
 
   function commit() {
     // Splits on commas so pasted or fast-typed "a, b, c" becomes three tags
@@ -26,6 +29,7 @@ export function TagInput({ value, onChange, placeholder, className }: TagInputPr
 
     const next = [...value];
     for (const tag of parts) {
+      if (maxTags !== undefined && next.length >= maxTags) break;
       if (!next.some((t) => t.toLowerCase() === tag.toLowerCase())) {
         next.push(tag);
       }
@@ -68,6 +72,7 @@ export function TagInput({ value, onChange, placeholder, className }: TagInputPr
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={commit}
+        disabled={atLimit}
         placeholder={value.length === 0 ? placeholder : undefined}
         className="h-6 flex-1 border-0 p-0 shadow-none focus-visible:ring-0"
       />
