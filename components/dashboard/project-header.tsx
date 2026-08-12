@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ScrapeButton } from "@/components/dashboard/scrape-button";
 import type { Project } from "@/lib/types";
 
 export function ProjectHeader({ project }: { project: Project }) {
@@ -13,19 +14,22 @@ export function ProjectHeader({ project }: { project: Project }) {
           {project.paused && <Badge variant="outline">Paused</Badge>}
         </div>
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {project.keywords.map((k) => (
+          {(project.keywords ?? []).map((k) => (
             <Badge key={k} variant="secondary" className="rounded-full text-xs font-normal">
               {k}
             </Badge>
           ))}
         </div>
       </div>
-      <Button variant="outline" size="sm" className="gap-1.5 self-start" asChild>
-        <Link href={`/projects/${project.id}/settings`}>
-          <Settings className="size-3.5" />
-          Project settings
-        </Link>
-      </Button>
+      <div className="flex items-center gap-2 self-start">
+        <ScrapeButton projectId={project.id} />
+        <Button variant="outline" size="sm" className="gap-1.5" asChild>
+          <Link href={`/projects/${project.id}/settings`}>
+            <Settings className="size-3.5" />
+            Project settings
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 }

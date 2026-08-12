@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { getProjects } from "@/lib/data/projects";
 import { getLeads } from "@/lib/data/leads";
+import { getAccountInfo } from "@/lib/data/billing";
+import { scanScheduleLabel } from "@/lib/schedule";
 import { ProjectHeader } from "@/components/dashboard/project-header";
 import { LeadFeed } from "@/components/dashboard/lead-feed";
 import { EmptyState } from "@/components/empty-state";
@@ -37,12 +39,21 @@ export default async function DashboardPage({
     );
   }
 
-  const leads = await getLeads({ userId: session!.user.id, projectId: activeProject.id });
+  const [leads, account] = await Promise.all([
+    getLeads({ userId: session!.user.id, projectId: activeProject.id }),
+    getAccountInfo(session!.user.id),
+  ]);
 
   return (
     <div>
       <ProjectHeader project={activeProject} />
-      <LeadFeed key={activeProject.id} initialLeads={leads} />
+      <LeadFeed
+        key={activeProject.id}
+        initialLeads={leads}
+        projectKeywords={activeProject.keywords ?? []}
+        scheduleLabel={scanScheduleLabel(activeProject, account.timezone)}
+        settingsHref={`/projects/${activeProject.id}/settings`}
+      />
     </div>
   );
 }

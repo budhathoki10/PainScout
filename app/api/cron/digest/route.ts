@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
-import { searchMultipleKeywords } from "@/lib/bluesky";
-import { filterPosts } from "@/lib/filter";
-import { rankForDigest } from "@/lib/digest";
+import { scanProjectForLeads } from "@/lib/scan";
 import { sendDigestEmail } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +40,10 @@ const MAX_EMAIL_LEADS = 2;
  * the demo UI never calls this route, it reads lib/mock-data.ts instead.
  */
 export async function POST(req: NextRequest) {
+  console.log("_______________________________________")
+  console.log("got the cron digest request0000")
+  console.log("_______________________________________")
+
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) {
     return NextResponse.json({ error: "CRON_SECRET is not configured on the server." }, { status: 500 });
@@ -83,36 +85,12 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const posts = await searchMultipleKeywords(project.keywords);
-      const scored = filterPosts(posts, project.keywords);
-      const ranked = rankForDigest(scored);
-
-      const existingUris = new Set(
-        (
-          await prisma.lead.findMany({
-            where: { projectId: project.id, postUri: { in: ranked.map((l) => l.postUri) } },
-            select: { postUri: true },
-          })
-        ).map((l) => l.postUri),
-      );
-      const freshLeads = ranked.filter((l) => !existingUris.has(l.postUri));
+      const freshLeads = await scanProjectForLeads(project);
 
       if (freshLeads.length === 0) {
         results.push({ project: project.name, sent: false, newLeads: 0 });
         continue;
       }
-
-      await prisma.lead.createMany({
-        data: freshLeads.map((l) => ({
-          projectId: project.id,
-          postUri: l.postUri,
-          authorHandle: l.authorHandle,
-          text: l.text,
-          url: l.url,
-          score: l.score,
-          matchedOn: l.matchedOn,
-        })),
-      });
 
       if (project.user.emailDigestOn) {
         await sendDigestEmail({
