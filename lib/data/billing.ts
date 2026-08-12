@@ -33,7 +33,7 @@ export async function getBillingInfo(userId: string): Promise<BillingInfo> {
       maxKeywordsInProject: projects.length
         ? Math.max(...projects.map((p) => p.keywords.length))
         : 0,
-      scansToday: scannedToday > 0 ? 1 : 0,
+      scansToday: scannedToday,
     },
   };
 }

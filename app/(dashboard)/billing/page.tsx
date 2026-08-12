@@ -10,6 +10,10 @@ import { UpgradeButton } from "@/components/billing/upgrade-button";
 
 export const metadata: Metadata = { title: "Billing" };
 
+// Plan limits use this as a practical "no real cap" sentinel rather than a
+// literal cap — the UI shows "Unlimited" instead of the raw number.
+const UNLIMITED_THRESHOLD = 999;
+
 const FREE_FEATURES = ["1 tracked project", "Up to 5 keywords", "Daily digest email", "7-day lead history"];
 const PRO_FEATURES = [
   "Unlimited projects",
@@ -32,7 +36,7 @@ export default async function BillingPage() {
       used: billing.usage.maxKeywordsInProject,
       limit: billing.limits.keywordsPerProject,
     },
-    { label: "Scans today", used: billing.usage.scansToday, limit: billing.limits.scansPerDay },
+    { label: "Digest emails sent today", used: billing.usage.scansToday, limit: billing.limits.scansPerDay },
   ];
 
   return (
@@ -63,16 +67,15 @@ export default async function BillingPage() {
         </CardHeader>
         <CardContent className="space-y-5">
           {usageRows.map((row) => {
-            const pct = Math.min(100, Math.round((row.used / row.limit) * 100));
+            const isUnlimited = row.limit >= UNLIMITED_THRESHOLD;
+            const pct = isUnlimited ? 0 : Math.min(100, Math.round((row.used / row.limit) * 100));
             return (
               <div key={row.label}>
                 <div className="mb-1.5 flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{row.label}</span>
-                  <span className="font-medium">
-                    {row.used} / {row.limit}
-                  </span>
+                  <span className="font-medium">{isUnlimited ? `${row.used} · Unlimited` : `${row.used} / ${row.limit}`}</span>
                 </div>
-                <Progress value={pct} />
+                {!isUnlimited && <Progress value={pct} />}
               </div>
             );
           })}
