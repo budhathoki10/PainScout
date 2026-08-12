@@ -25,6 +25,10 @@ function deliveryHoursFor(project: { deliveryHour: number; frequency: string }):
 
 const RECENT_SEND_GUARD_MS = 55 * 60 * 1000;
 
+// The dashboard shows every fresh lead; the email is a quick daily glance,
+// so it only gets the top-scoring ones (freshLeads is already score-sorted).
+const MAX_EMAIL_LEADS = 2;
+
 /**
  * Full production pipeline (spec Section 5-7): dedupe against stored
  * postUris -> pain filter -> rank -> persist -> email.
@@ -114,7 +118,8 @@ export async function POST(req: NextRequest) {
         await sendDigestEmail({
           to: project.user.email,
           projectName: project.name,
-          leads: freshLeads,
+          leads: freshLeads.slice(0, MAX_EMAIL_LEADS),
+          totalCount: freshLeads.length,
           dashboardUrl: `${process.env.NEXTAUTH_URL ?? "https://example.com"}/dashboard`,
         });
       }

@@ -21,6 +21,8 @@ export interface DigestEmailLead {
 interface DigestEmailProps {
   projectName: string;
   leads: DigestEmailLead[];
+  /** True count of fresh leads found this run — leads may be a top-N slice of this. */
+  totalCount: number;
   dashboardUrl: string;
 }
 
@@ -29,8 +31,8 @@ const INK = "#18181b";
 const MUTED = "#71717a";
 const BORDER = "#e4e4e7";
 
-export default function DigestEmail({ projectName, leads, dashboardUrl }: DigestEmailProps) {
-  const previewText = `${leads.length} new lead${leads.length === 1 ? "" : "s"} for ${projectName}`;
+export default function DigestEmail({ projectName, leads, totalCount, dashboardUrl }: DigestEmailProps) {
+  const previewText = `${totalCount} new lead${totalCount === 1 ? "" : "s"} for ${projectName}`;
   return (
     <Html>
       <Head />
@@ -41,10 +43,12 @@ export default function DigestEmail({ projectName, leads, dashboardUrl }: Digest
             Pain Scout
           </Text>
           <Heading style={{ fontSize: 20, color: INK, margin: "0 0 4px" }}>
-            {leads.length} new lead{leads.length === 1 ? "" : "s"} for {projectName}
+            {totalCount} new lead{totalCount === 1 ? "" : "s"} for {projectName}
           </Heading>
           <Text style={{ fontSize: 14, color: MUTED, margin: "0 0 24px" }}>
-            Today&apos;s top matches, ranked by relevance.
+            {totalCount > leads.length
+              ? `Top ${leads.length} matches below — see all ${totalCount} on your dashboard.`
+              : "Today's top matches, ranked by relevance."}
           </Text>
 
           {leads.map((lead, i) => (
