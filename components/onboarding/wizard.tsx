@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 const STEPS = ["Name your project", "Add keywords"];
 
-export function OnboardingWizard() {
+export function OnboardingWizard({ maxKeywords }: { maxKeywords?: number }) {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
@@ -110,11 +110,19 @@ export function OnboardingWizard() {
 
           {step === 1 && (
             <div className="space-y-2">
-              <Label>What keywords or phrases represent the pain point?</Label>
+              <div className="flex items-center justify-between">
+                <Label>What keywords or phrases represent the pain point?</Label>
+                {maxKeywords !== undefined && (
+                  <span className="text-xs text-muted-foreground">
+                    {keywords.length} / {maxKeywords}
+                  </span>
+                )}
+              </div>
               <TagInput
                 value={keywords}
                 onChange={setKeywords}
                 placeholder="Type a keyword and press Enter…"
+                maxTags={maxKeywords}
               />
               <p className="text-xs text-muted-foreground">
                 e.g. &quot;invoicing&quot;, &quot;late payment&quot;, &quot;chasing payment&quot; — we&apos;ll

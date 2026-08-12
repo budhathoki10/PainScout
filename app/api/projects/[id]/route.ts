@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { getEffectivePlan, getPlanLimits } from "@/lib/plan-limits";
 
 const VALID_FREQUENCIES = ["DAILY", "TWICE_DAILY"];
 
@@ -35,6 +36,22 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   if (!isDatabaseConfigured()) {
     return NextResponse.json({ ok: true, persisted: false });
+  }
+
+  const plan = await getEffectivePlan(session.user.id);
+  const limits = getPlanLimits(plan);
+
+  if (keywords.length > limits.keywordsPerProject) {
+    return NextResponse.json(
+      { error: `Your plan allows up to ${limits.keywordsPerProject} keywords per project. Upgrade to Pro for unlimited keywords.` },
+      { status: 403 },
+    );
+  }
+  if (frequency === "TWICE_DAILY" && plan === "FREE") {
+    return NextResponse.json(
+      { error: "Twice-daily digests are a Pro feature. Upgrade to Pro to enable this." },
+      { status: 403 },
+    );
   }
 
   const prisma = getPrisma();

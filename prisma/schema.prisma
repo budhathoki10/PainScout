@@ -108,12 +108,23 @@ model Lead {
   @@index([projectId, createdAt])
 }
 
+enum DigestSource {
+  CRON
+  MANUAL
+}
+
 model DigestLog {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  projectId String   @db.ObjectId
-  sentAt    DateTime @default(now())
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
+  projectId String       @db.ObjectId
+  sentAt    DateTime     @default(now())
   leadCount Int
-  opened    Boolean  @default(false)
+  opened    Boolean      @default(false)
+  // CRON = scheduled digest (may have emailed); MANUAL = a "Scrape now"
+  // click (never emails). Both count toward a plan's daily scan budget
+  // (lib/plan-limits.ts), but only CRON rows gate the cron route's own
+  // "already ran this delivery window" guard — a manual scrape shouldn't
+  // block the scheduled run for that slot from firing.
+  source    DigestSource @default(CRON)
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
@@ -121,15 +132,47 @@ model DigestLog {
 }
 
 model Subscription {
-  id                     String             @id @default(auto()) @map("_id") @db.ObjectId
-  userId                 String             @unique @db.ObjectId
-  plan                   PlanTier           @default(FREE)
-  status                 SubscriptionStatus @default(ACTIVE)
+  id     String             @id @default(auto()) @map("_id") @db.ObjectId
+  userId String             @unique @db.ObjectId
+  plan   PlanTier           @default(FREE)
+  // Webhook-driven label only — NOT what gates access. See lib/entitlements.ts:
+  // access is decided live by comparing currentPeriodEnd against now, since
+  // Freemius does not reliably fire a webhook exactly when a period lapses
+  // (e.g. a silently failed renewal). status still matters for
+  // ACTIVE/PAST_DUE vs CANCELED, just not for the time bound.
+  status SubscriptionStatus @default(ACTIVE)
+
+  // Freemius's own license id — the stable key renewal/cancellation/expiry
+  // webhooks are matched against, instead of re-resolving by email every time.
+  // Not a DB-level unique constraint (Mongo unique indexes reject multiple
+  // nulls, and every pre-Freemius Subscription row has none) — matching code
+  // in lib/billing-freemius.ts already resolves by userId either way.
+  fsLicenseId            String?
   freemiusUserId         String?
   freemiusSubscriptionId String?
+  // Set once, at first successful purchase, never overwritten on renewal —
+  // "subscriber since," not "current billing cycle start."
+  currentPeriodStart     DateTime?
   currentPeriodEnd       DateTime?
-  createdAt              DateTime           @default(now())
-  updatedAt              DateTime           @updatedAt
+  canceledAt             DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([fsLicenseId])
+}
+
+// Freemius webhook replay guard: the SDK verifies signatures but doesn't
+// stop the same event being delivered twice (a genuine retry, or a captured
+// payload replayed by an attacker) — claims eventId exactly once via the
+// unique [provider, eventId] index below.
+model WebhookEvent {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  provider  String
+  eventId   String
+  eventType String?
+  createdAt DateTime @default(now())
+
+  @@unique([provider, eventId])
 }
