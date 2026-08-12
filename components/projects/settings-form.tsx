@@ -42,19 +42,39 @@ export function ProjectSettingsForm({ project }: { project: Project }) {
 
   async function handleSave() {
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setSaving(false);
-    toast.success("Project settings saved", {
-      description: "Demo build — changes aren't persisted after a refresh.",
-    });
+    try {
+      const res = await fetch(`/api/projects/${project.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), keywords, frequency, deliveryHour, paused }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to save");
+      toast.success("Project settings saved");
+      router.refresh();
+    } catch (err) {
+      toast.error("Couldn't save project settings", {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleDelete() {
     setDeleting(true);
-    await new Promise((r) => setTimeout(r, 500));
-    setDeleting(false);
-    toast("Project deleted", { description: "Demo build — nothing was actually removed." });
-    router.push("/dashboard");
+    try {
+      const res = await fetch(`/api/projects/${project.id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to delete");
+      toast("Project deleted");
+      router.push("/dashboard");
+    } catch (err) {
+      toast.error("Couldn't delete project", {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+      setDeleting(false);
+    }
   }
 
   return (

@@ -7,12 +7,33 @@ import { sendDigestEmail } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
+/** Hour (0-23) it currently is in the given IANA timezone. */
+function currentHourIn(timeZone: string): number {
+  const hourStr = new Intl.DateTimeFormat("en-US", { timeZone, hour: "numeric", hour12: false }).format(
+    new Date(),
+  );
+  // "24" is midnight in some locales' hour12:false output — normalize to 0.
+  return Number(hourStr) % 24;
+}
+
+/** A project's target delivery hours, in its owner's timezone. */
+function deliveryHoursFor(project: { deliveryHour: number; frequency: string }): number[] {
+  return project.frequency === "TWICE_DAILY"
+    ? [project.deliveryHour, (project.deliveryHour + 12) % 24]
+    : [project.deliveryHour];
+}
+
+const RECENT_SEND_GUARD_MS = 55 * 60 * 1000;
+
 /**
  * Full production pipeline (spec Section 5-7): dedupe against stored
  * postUris -> pain filter -> rank -> persist -> email.
  *
- * Triggered daily by an external scheduler (cron-job.org) calling this route
- * with `Authorization: Bearer $CRON_SECRET`. Requires DATABASE_URL,
+ * Triggered by an external scheduler (cron-job.org) calling this route with
+ * `Authorization: Bearer $CRON_SECRET` — expected to fire at least once an
+ * hour so this route's own timezone/deliveryHour gating can decide which
+ * projects are actually due. Pass `?force=true` to bypass the gate (still
+ * requires the same auth) for manual testing. Requires DATABASE_URL,
  * BLUESKY_HANDLE/BLUESKY_APP_PASSWORD, and RESEND_API_KEY to actually run —
  * the demo UI never calls this route, it reads lib/mock-data.ts instead.
  */
@@ -29,6 +50,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "DATABASE_URL is not configured on the server." }, { status: 500 });
   }
 
+  const force = req.nextUrl.searchParams.get("force") === "true";
+
   const prisma = getPrisma();
   const projects = await prisma.project.findMany({
     where: { paused: false },
@@ -39,6 +62,23 @@ export async function POST(req: NextRequest) {
 
   for (const project of projects) {
     try {
+      if (!force) {
+        const currentHour = currentHourIn(project.user.timezone);
+        if (!deliveryHoursFor(project).includes(currentHour)) {
+          results.push({ project: project.name, scheduled: false, reason: "not this project's delivery hour" });
+          continue;
+        }
+
+        const recentLog = await prisma.digestLog.findFirst({
+          where: { projectId: project.id },
+          orderBy: { sentAt: "desc" },
+        });
+        if (recentLog && Date.now() - recentLog.sentAt.getTime() < RECENT_SEND_GUARD_MS) {
+          results.push({ project: project.name, scheduled: false, reason: "already ran this delivery window" });
+          continue;
+        }
+      }
+
       const posts = await searchMultipleKeywords(project.keywords);
       const scored = filterPosts(posts, project.keywords);
       const ranked = rankForDigest(scored);
