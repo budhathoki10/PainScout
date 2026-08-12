@@ -15,7 +15,6 @@ function toProject(row: PrismaProject): Project {
     id: row.id,
     userId: row.userId,
     name: row.name,
-    subreddits: row.subreddits,
     keywords: row.keywords,
     frequency: row.frequency,
     deliveryHour: row.deliveryHour,

@@ -10,10 +10,10 @@ import { UpgradeButton } from "@/components/billing/upgrade-button";
 
 export const metadata: Metadata = { title: "Billing" };
 
-const FREE_FEATURES = ["1 tracked project", "Up to 4 subreddits", "Daily digest email", "7-day lead history"];
+const FREE_FEATURES = ["1 tracked project", "Up to 5 keywords", "Daily digest email", "7-day lead history"];
 const PRO_FEATURES = [
   "Unlimited projects",
-  "Unlimited subreddits & keywords",
+  "Unlimited keywords",
   "Twice-daily digests",
   "Full lead history & analytics",
   "Priority support",
@@ -28,9 +28,9 @@ export default async function BillingPage() {
   const usageRows = [
     { label: "Projects", used: billing.usage.projects, limit: billing.limits.projects },
     {
-      label: "Subreddits in largest project",
-      used: billing.usage.maxSubredditsInAnyProject,
-      limit: billing.limits.subredditsPerProject,
+      label: "Keywords in largest project",
+      used: billing.usage.maxKeywordsInProject,
+      limit: billing.limits.keywordsPerProject,
     },
     { label: "Scans today", used: billing.usage.scansToday, limit: billing.limits.scansPerDay },
   ];

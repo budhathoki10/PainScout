@@ -1,0 +1,17 @@
+export const EXAMPLE_KEYWORDS = [
+  "analytics dashboard",
+  "invoicing",
+  "uptime monitoring",
+  "customer support tool",
+  "onboarding flow",
+  "late payment",
+  "pricing page",
+  "CRM alternative",
+  "email automation",
+  "churn",
+  "A/B testing",
+  "no-code",
+  "server monitoring",
+  "billing software",
+  "chasing payment",
+];

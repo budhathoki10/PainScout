@@ -15,7 +15,7 @@ export default function OnboardingPage() {
       <main className="mx-auto max-w-lg px-4 pb-16">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">Set up your first project</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Three quick steps and you&apos;re watching Reddit.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Two quick steps and you&apos;re watching Bluesky.</p>
         </div>
         <OnboardingWizard />
       </main>

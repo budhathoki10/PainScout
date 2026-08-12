@@ -24,22 +24,22 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
 ];
 
 interface FilterBarProps {
-  subreddits: string[];
+  keywords: string[];
   status: StatusFilter;
   onStatusChange: (v: StatusFilter) => void;
-  subreddit: string;
-  onSubredditChange: (v: string) => void;
+  keyword: string;
+  onKeywordChange: (v: string) => void;
   sort: SortOption;
   onSortChange: (v: SortOption) => void;
   resultCount: number;
 }
 
 export function FilterBar({
-  subreddits,
+  keywords,
   status,
   onStatusChange,
-  subreddit,
-  onSubredditChange,
+  keyword,
+  onKeywordChange,
   sort,
   onSortChange,
   resultCount,
@@ -62,17 +62,17 @@ export function FilterBar({
           </SelectContent>
         </Select>
 
-        <Select value={subreddit} onValueChange={(v) => v && onSubredditChange(v)}>
+        <Select value={keyword} onValueChange={(v) => v && onKeywordChange(v)}>
           <SelectTrigger size="sm" className="w-[160px]">
-            <SelectValue placeholder="Subreddit">
-              {(v: string) => (v === "ALL" ? "All subreddits" : `r/${v}`)}
+            <SelectValue placeholder="Keyword">
+              {(v: string) => (v === "ALL" ? "All keywords" : v)}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">All subreddits</SelectItem>
-            {subreddits.map((s) => (
-              <SelectItem key={s} value={s}>
-                r/{s}
+            <SelectItem value="ALL">All keywords</SelectItem>
+            {keywords.map((k) => (
+              <SelectItem key={k} value={k}>
+                {k}
               </SelectItem>
             ))}
           </SelectContent>

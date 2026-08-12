@@ -17,7 +17,6 @@ export async function seedDemoDataForUser(userId: string): Promise<void> {
       data: {
         userId,
         name: project.name,
-        subreddits: project.subreddits,
         keywords: project.keywords,
         frequency: project.frequency,
         deliveryHour: project.deliveryHour,
@@ -30,12 +29,10 @@ export async function seedDemoDataForUser(userId: string): Promise<void> {
   await prisma.lead.createMany({
     data: mockLeads.map((lead) => ({
       projectId: projectIdByMockId[lead.projectId],
-      redditId: lead.redditId,
-      subreddit: lead.subreddit,
-      title: lead.title,
-      snippet: lead.snippet,
+      postUri: lead.postUri,
+      authorHandle: lead.authorHandle,
+      text: lead.text,
       url: lead.url,
-      author: lead.author,
       score: lead.score,
       status: lead.status,
       matchedOn: lead.matchedOn,

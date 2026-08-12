@@ -1,4 +1,4 @@
-// Reddit Pain Scout — data model
+// Pain Scout — data model
 // MongoDB via Prisma. Requires DATABASE_URL (MongoDB connection string) to migrate/run.
 // See lib/prisma.ts for why this is safe to leave unconfigured in the demo build.
 
@@ -75,7 +75,6 @@ model Project {
   id            String           @id @default(auto()) @map("_id") @db.ObjectId
   userId        String           @db.ObjectId
   name          String
-  subreddits    String[]
   keywords      String[]
   frequency     DigestFrequency  @default(DAILY)
   deliveryHour  Int              @default(8)
@@ -91,23 +90,21 @@ model Project {
 }
 
 model Lead {
-  id         String     @id @default(auto()) @map("_id") @db.ObjectId
-  projectId  String     @db.ObjectId
-  redditId   String
-  subreddit  String
-  title      String
-  snippet    String
-  url        String
-  author     String
-  score      Float
-  status     LeadStatus @default(NEW)
-  matchedOn  String[]
-  createdAt  DateTime   @default(now())
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  projectId    String     @db.ObjectId
+  postUri      String
+  authorHandle String
+  text         String
+  url          String
+  score        Float
+  status       LeadStatus @default(NEW)
+  matchedOn    String[]
+  createdAt    DateTime   @default(now())
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  // Deduplication: a given Reddit post is only ever stored once per project.
-  @@unique([projectId, redditId])
+  // Deduplication: a given Bluesky post is only ever stored once per project.
+  @@unique([projectId, postUri])
   @@index([projectId, createdAt])
 }
 

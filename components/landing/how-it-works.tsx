@@ -7,19 +7,19 @@ const STEPS = [
     icon: Radar,
     title: "Tell it what to watch",
     description:
-      "Pick the subreddits and keywords that represent the problem you solve — r/SaaS, r/Entrepreneur, whatever fits your niche.",
+      "Pick the keywords that represent the problem you solve — \"invoicing\", \"uptime monitoring\", whatever fits your niche.",
   },
   {
     icon: ListFilter,
     title: "It scans and filters daily",
     description:
-      "A scheduled scan pulls new posts, discards memes and noise, and keeps only genuine complaints that match what you're tracking.",
+      "A scheduled scan searches Bluesky for new posts, discards memes and noise, and keeps only genuine complaints that match what you're tracking.",
   },
   {
     icon: Mail,
     title: "You get a ranked digest",
     description:
-      "The best matches land in your inbox every morning. Reply to the ones that fit — no more scrolling Reddit for hours.",
+      "The best matches land in your inbox every morning. Reply to the ones that fit — no more scrolling Bluesky for hours.",
   },
 ];
 

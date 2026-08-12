@@ -18,11 +18,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Reddit Pain Scout — Find your next customers on Reddit",
-    template: "%s · Reddit Pain Scout",
+    default: "Pain Scout — Find your next customers on Bluesky",
+    template: "%s · Pain Scout",
   },
   description:
-    "Reddit Pain Scout scans the subreddits you choose for genuine pain points and emails you a ranked daily digest of warm leads.",
+    "Pain Scout scans Bluesky for the keywords you choose to find genuine pain points and emails you a ranked daily digest of warm leads.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

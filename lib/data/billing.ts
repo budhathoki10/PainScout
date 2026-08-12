@@ -3,8 +3,8 @@ import { mockAccount, mockBilling } from "@/lib/mock-data";
 import type { AccountInfo, BillingInfo, PlanTier } from "@/lib/types";
 
 const PLAN_LIMITS: Record<PlanTier, BillingInfo["limits"]> = {
-  FREE: { projects: 1, subredditsPerProject: 4, scansPerDay: 1 },
-  PRO: { projects: 999, subredditsPerProject: 999, scansPerDay: 2 },
+  FREE: { projects: 1, keywordsPerProject: 5, scansPerDay: 1 },
+  PRO: { projects: 999, keywordsPerProject: 999, scansPerDay: 2 },
 };
 
 export async function getBillingInfo(userId: string): Promise<BillingInfo> {
@@ -13,7 +13,7 @@ export async function getBillingInfo(userId: string): Promise<BillingInfo> {
   const prisma = getPrisma();
   const [subscription, projects] = await Promise.all([
     prisma.subscription.findUnique({ where: { userId } }),
-    prisma.project.findMany({ where: { userId }, select: { subreddits: true } }),
+    prisma.project.findMany({ where: { userId }, select: { keywords: true } }),
   ]);
 
   const plan: PlanTier = subscription?.plan ?? "FREE";
@@ -30,8 +30,8 @@ export async function getBillingInfo(userId: string): Promise<BillingInfo> {
     limits: PLAN_LIMITS[plan],
     usage: {
       projects: projects.length,
-      maxSubredditsInAnyProject: projects.length
-        ? Math.max(...projects.map((p) => p.subreddits.length))
+      maxKeywordsInProject: projects.length
+        ? Math.max(...projects.map((p) => p.keywords.length))
         : 0,
       scansToday: scannedToday > 0 ? 1 : 0,
     },
