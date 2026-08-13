@@ -95,12 +95,8 @@ export async function POST(req: NextRequest) {
         }
       }
 
+      const scannedAt = new Date();
       const freshLeads = await scanProjectForLeads(project);
-
-      if (freshLeads.length === 0) {
-        results.push({ project: project.name, sent: false, newLeads: 0 });
-        continue;
-      }
 
       if (project.user.emailDigestOn) {
         await sendDigestEmail({
@@ -109,6 +105,8 @@ export async function POST(req: NextRequest) {
           leads: freshLeads.slice(0, MAX_EMAIL_LEADS),
           totalCount: freshLeads.length,
           dashboardUrl: `${process.env.NEXTAUTH_URL ?? "https://example.com"}/dashboard`,
+          scannedAt,
+          timezone: project.user.timezone,
         });
       }
 
