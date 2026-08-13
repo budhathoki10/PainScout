@@ -15,7 +15,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 — the marketing site, `/login`, and `/signup` all render with
+Open [http://localhost:3000](https://painscout.netlify.app) — the marketing site, `/login`, and `/signup` all render with
 zero configuration. To sign in and reach the dashboard, you need a Google OAuth client at
 minimum (see [Environment variables](#environment-variables) below): Google is the only
 sign-in method, so `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` are required even before any
