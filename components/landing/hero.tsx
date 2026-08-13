@@ -42,7 +42,10 @@ export function Hero() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Magnetic className="inline-block">
-              <Button size="xl" className="gap-2" asChild>
+              {/* TEST ONLY — literal think-like-senior-developer spec (48px / 12px radius)
+                  isolated to this one button via override classes, for comparison against
+                  the project's own xl (44px / 10px) elsewhere. Not applied anywhere else. */}
+              <Button size="xl" className="h-12 gap-2 rounded-[12px] px-6" asChild>
                 <Link href="/signup">
                   Get started free <ArrowRight className="size-4" />
                 </Link>
