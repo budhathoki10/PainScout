@@ -17,11 +17,10 @@ export function ValueStrip() {
             <span className="flex size-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
               <Clock className="size-5" />
             </span>
-            <p className="mt-4 text-3xl font-semibold tracking-tight">
-              <Counter to={15} suffix="+ hrs/week" />
-            </p>
+            <p className="mt-4 text-3xl font-semibold tracking-tight text-balance">Get your time back</p>
             <p className="mt-1.5 max-w-sm text-sm text-muted-foreground text-pretty">
-              Reported time founders lose to manually scrolling Bluesky, hunting for the right complaint.
+              Pain Scout scans Bluesky continuously and filters out the noise — so you don&apos;t have to
+              scroll for it.
             </p>
             <Radar className="pointer-events-none absolute -right-6 -bottom-6 size-28 text-primary/[0.06]" strokeWidth={1} />
           </div>

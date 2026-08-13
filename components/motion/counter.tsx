@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, prefersReducedMotion, registerGsapPlugins } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
 registerGsapPlugins();
 
@@ -41,7 +42,7 @@ export function Counter({ to, prefix = "", suffix = "", decimals = 0, className,
   }, [to]);
 
   return (
-    <span ref={ref} className={className}>
+    <span ref={ref} className={cn("tabular-nums", className)}>
       {prefix}0{suffix}
     </span>
   );

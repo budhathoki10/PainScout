@@ -32,7 +32,7 @@ const PLANS = [
       "Full lead history & analytics",
       "Priority support",
     ],
-    cta: "Upgrade to Pro",
+    cta: "Start with Pro",
     highlighted: true,
   },
 ];
@@ -48,7 +48,7 @@ export function Pricing() {
           </p>
         </Reveal>
 
-        <Reveal as="div" stagger={0.1} y={20} className="mx-auto mt-14 grid max-w-3xl gap-6 sm:grid-cols-2">
+        <Reveal as="div" stagger={0.1} y={20} className="mx-auto mt-14 grid max-w-3xl gap-6 md:grid-cols-2">
           {PLANS.map((plan) =>
             plan.highlighted ? (
               <SpotlightCard
@@ -95,6 +95,7 @@ function PlanBody({ plan }: { plan: (typeof PLANS)[number] }) {
       </ul>
 
       <Button
+        size="xl"
         className={cn("mt-8 w-full")}
         variant={plan.highlighted ? "default" : "outline"}
         asChild
