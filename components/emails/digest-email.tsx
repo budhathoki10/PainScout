@@ -24,6 +24,10 @@ interface DigestEmailProps {
   /** True count of fresh leads found this run — leads may be a top-N slice of this. */
   totalCount: number;
   dashboardUrl: string;
+  /** When this run's Bluesky scrape happened. */
+  scannedAt: Date;
+  /** Owner's IANA timezone, so scannedAt reads correctly for them. */
+  timezone: string;
 }
 
 const ACCENT = "#059669";
@@ -31,8 +35,18 @@ const INK = "#18181b";
 const MUTED = "#71717a";
 const BORDER = "#e4e4e7";
 
-export default function DigestEmail({ projectName, leads, totalCount, dashboardUrl }: DigestEmailProps) {
-  const previewText = `${totalCount} new lead${totalCount === 1 ? "" : "s"} for ${projectName}`;
+export default function DigestEmail({ projectName, leads, totalCount, dashboardUrl, scannedAt, timezone }: DigestEmailProps) {
+  const previewText =
+    totalCount === 0
+      ? `No new leads for ${projectName}`
+      : `${totalCount} new lead${totalCount === 1 ? "" : "s"} for ${projectName}`;
+  const scannedAtLabel = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(scannedAt);
   return (
     <Html>
       <Head />
@@ -43,12 +57,17 @@ export default function DigestEmail({ projectName, leads, totalCount, dashboardU
             Pain Scout
           </Text>
           <Heading style={{ fontSize: 20, color: INK, margin: "0 0 4px" }}>
-            {totalCount} new lead{totalCount === 1 ? "" : "s"} for {projectName}
+            {totalCount === 0 ? `No new leads for ${projectName}` : `${totalCount} new lead${totalCount === 1 ? "" : "s"} for ${projectName}`}
           </Heading>
-          <Text style={{ fontSize: 14, color: MUTED, margin: "0 0 24px" }}>
-            {totalCount > leads.length
-              ? `Top ${leads.length} matches below — see all ${totalCount} on your dashboard.`
-              : "Today's top matches, ranked by relevance."}
+          <Text style={{ fontSize: 14, color: MUTED, margin: "0 0 4px" }}>
+            {totalCount === 0
+              ? `We just scraped Bluesky for your keywords and nothing new matched — we'll keep watching and email you as soon as something does.`
+              : totalCount > leads.length
+                ? `Top ${leads.length} matches below — see all ${totalCount} on your dashboard.`
+                : "Today's top matches, ranked by relevance."}
+          </Text>
+          <Text style={{ fontSize: 12, color: MUTED, margin: "0 0 24px" }}>
+            Latest scrape: {scannedAtLabel}
           </Text>
 
           {leads.map((lead, i) => (
