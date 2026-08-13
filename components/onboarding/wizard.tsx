@@ -105,6 +105,9 @@ export function OnboardingWizard() {
               <p className="text-xs text-muted-foreground">
                 This becomes the name of your project and shows up in your daily digest subject line.
               </p>
+              {name.trim().length <= 1 && (
+                <p className="text-xs text-warning">Enter a project name to continue.</p>
+              )}
             </div>
           )}
 
@@ -120,6 +123,9 @@ export function OnboardingWizard() {
                 e.g. &quot;invoicing&quot;, &quot;late payment&quot;, &quot;chasing payment&quot; — we&apos;ll
                 search Bluesky for posts matching these.
               </p>
+              {keywords.length === 0 && (
+                <p className="text-xs text-warning">Add at least one keyword to continue.</p>
+              )}
             </div>
           )}
         </CardContent>

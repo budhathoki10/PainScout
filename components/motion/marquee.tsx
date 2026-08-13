@@ -41,13 +41,15 @@ export function Marquee({ items, className, speed = 40 }: MarqueeProps) {
       onMouseEnter={() => tweenRef.current?.pause()}
       onMouseLeave={() => tweenRef.current?.resume()}
     >
-      <div ref={trackRef} className="flex w-max items-center gap-3 will-change-transform">
+      {/* Decorative — items are duplicated for the seamless loop, which would
+          read as repeated content to a screen reader. */}
+      <div ref={trackRef} aria-hidden className="flex w-max items-center gap-3 will-change-transform">
         {[...items, ...items].map((item, i) => (
           <span
             key={`${item}-${i}`}
             className="shrink-0 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground"
           >
-            r/{item}
+            {item}
           </span>
         ))}
       </div>

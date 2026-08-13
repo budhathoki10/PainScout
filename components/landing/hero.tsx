@@ -31,7 +31,7 @@ export function Hero() {
             Now watching Bluesky for you
           </Badge>
 
-          <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.25rem] lg:leading-[1.08]">
+          <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.25rem] lg:leading-[1.08] xl:text-6xl">
             Find your next customer <span className="text-primary">before they find you</span>
           </h1>
 
@@ -42,13 +42,13 @@ export function Hero() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Magnetic className="inline-block">
-              <Button size="lg" className="gap-2" asChild>
+              <Button size="xl" className="gap-2" asChild>
                 <Link href="/signup">
                   Get started free <ArrowRight className="size-4" />
                 </Link>
               </Button>
             </Magnetic>
-            <Button size="lg" variant="outline" asChild>
+            <Button size="xl" variant="outline" asChild>
               <Link href="#how-it-works">See how it works</Link>
             </Button>
           </div>

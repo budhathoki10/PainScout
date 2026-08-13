@@ -5,9 +5,9 @@ import { Mail } from "lucide-react";
 import { gsap, prefersReducedMotion } from "@/lib/motion";
 
 const PREVIEW_LEADS = [
-  { sub: "r/SaaS", score: 94, title: "Google Analytics is so bloated I've started tracking events in a spreadsheet" },
-  { sub: "r/freelance", score: 96, title: "Chasing a client for payment for the 4th time this month" },
-  { sub: "r/sysadmin", score: 92, title: "Found out about downtime from a customer email, not our monitoring" },
+  { handle: "@buildwithdev.bsky.social", score: 94, title: "Google Analytics is so bloated I've started tracking events in a spreadsheet" },
+  { handle: "@freelancefolks.bsky.social", score: 96, title: "Chasing a client for payment for the 4th time this month" },
+  { handle: "@opsdaily.bsky.social", score: 92, title: "Found out about downtime from a customer email, not our monitoring" },
 ];
 
 export function HeroPreviewCard() {
@@ -65,8 +65,8 @@ export function HeroPreviewCard() {
           {PREVIEW_LEADS.map((lead) => (
             <li key={lead.title} className="px-5 py-4">
               <div className="mb-1.5 flex items-center justify-between text-xs">
-                <span className="font-medium text-primary">{lead.sub}</span>
-                <span className="text-muted-foreground">{lead.score}% match</span>
+                <span className="font-medium text-primary">{lead.handle}</span>
+                <span className="text-muted-foreground tabular-nums">{lead.score}% match</span>
               </div>
               <p className="text-sm leading-snug font-medium text-pretty">{lead.title}</p>
             </li>
