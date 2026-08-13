@@ -2,10 +2,11 @@ import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 
 /**
- * Edge-compatible slice of the auth config — no Prisma adapter here.
+ * Edge-compatible slice of the auth config — no Prisma import here.
  * middleware.ts builds its own NextAuth instance from just this file so the
  * Edge Middleware bundle never has to load Prisma's native/WASM engine.
- * lib/auth.ts extends this with the adapter for the full Node runtime.
+ * lib/auth.ts extends this with the DB-backed jwt callback for the full
+ * Node runtime.
  */
 
 const PROTECTED_PREFIXES = [

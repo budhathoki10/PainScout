@@ -3,22 +3,35 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, Loader2, PartyPopper } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Lock, Loader2, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { TagInput } from "@/components/tag-input";
+import { UpgradeButton } from "@/components/billing/upgrade-button";
 import { cn } from "@/lib/utils";
+import type { FreemiusCheckoutConfig } from "@/lib/freemius";
 
 const STEPS = ["Name your project", "Add keywords"];
 
-export function OnboardingWizard() {
+export function OnboardingWizard({
+  maxKeywords,
+  checkoutConfig,
+  userName,
+  userEmail,
+}: {
+  maxKeywords: number;
+  checkoutConfig: FreemiusCheckoutConfig | null;
+  userName?: string;
+  userEmail?: string;
+}) {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [limitError, setLimitError] = useState<string | null>(null);
 
   const canAdvance = [name.trim().length > 1, keywords.length > 0][step];
 
@@ -31,7 +44,13 @@ export function OnboardingWizard() {
         body: JSON.stringify({ name: name.trim(), keywords }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to create project");
+      if (!res.ok) {
+        if (res.status === 403) {
+          setLimitError(data.error ?? "You've reached your plan's limit.");
+          return;
+        }
+        throw new Error(data.error ?? "Failed to create project");
+      }
       setDone(true);
     } catch (err) {
       toast.error("Couldn't create project", {
@@ -40,6 +59,26 @@ export function OnboardingWizard() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (limitError) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center px-8 py-12 text-center">
+          <span className="flex size-14 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
+            <Lock className="size-6" />
+          </span>
+          <h1 className="mt-6 text-xl font-semibold">You&apos;ve hit the Free plan limit</h1>
+          <p className="mt-2 max-w-xs text-sm text-pretty text-muted-foreground">{limitError}</p>
+          <div className="mt-6 flex flex-col items-center gap-2 sm:flex-row">
+            <UpgradeButton config={checkoutConfig} userName={userName} userEmail={userEmail} />
+            <Button variant="ghost" asChild>
+              <Link href="/dashboard">Maybe later</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (done) {
@@ -115,10 +154,11 @@ export function OnboardingWizard() {
                 value={keywords}
                 onChange={setKeywords}
                 placeholder="Type a keyword and press Enter…"
+                maxTags={maxKeywords}
               />
               <p className="text-xs text-muted-foreground">
-                e.g. &quot;invoicing&quot;, &quot;late payment&quot;, &quot;chasing payment&quot; — we&apos;ll
-                search Bluesky for posts matching these.
+                {keywords.length} / {maxKeywords} keywords — e.g. &quot;invoicing&quot;, &quot;late
+                payment&quot;, &quot;chasing payment&quot;.
               </p>
             </div>
           )}

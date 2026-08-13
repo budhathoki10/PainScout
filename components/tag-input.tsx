@@ -11,12 +11,18 @@ interface TagInputProps {
   onChange: (tags: string[]) => void;
   placeholder?: string;
   className?: string;
+  maxTags?: number;
 }
 
-export function TagInput({ value, onChange, placeholder, className }: TagInputProps) {
+export function TagInput({ value, onChange, placeholder, className, maxTags }: TagInputProps) {
   const [draft, setDraft] = useState("");
+  const atLimit = maxTags !== undefined && value.length >= maxTags;
 
   function commit() {
+    if (atLimit) {
+      setDraft("");
+      return;
+    }
     // Splits on commas so pasted or fast-typed "a, b, c" becomes three tags
     // instead of one literal tag containing commas.
     const parts = draft
@@ -26,6 +32,7 @@ export function TagInput({ value, onChange, placeholder, className }: TagInputPr
 
     const next = [...value];
     for (const tag of parts) {
+      if (maxTags !== undefined && next.length >= maxTags) break;
       if (!next.some((t) => t.toLowerCase() === tag.toLowerCase())) {
         next.push(tag);
       }
@@ -63,14 +70,16 @@ export function TagInput({ value, onChange, placeholder, className }: TagInputPr
           </button>
         </Badge>
       ))}
-      <Input
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={commit}
-        placeholder={value.length === 0 ? placeholder : undefined}
-        className="h-6 flex-1 border-0 p-0 shadow-none focus-visible:ring-0"
-      />
+      {!atLimit && (
+        <Input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={commit}
+          placeholder={value.length === 0 ? placeholder : undefined}
+          className="h-6 flex-1 border-0 p-0 shadow-none focus-visible:ring-0"
+        />
+      )}
     </div>
   );
 }
