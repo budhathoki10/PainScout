@@ -1,0 +1,6 @@
+{
+  "watch": ["prisma/schema.prisma"],
+  "ext": "prisma",
+  "exec": "npx prisma generate && next dev",
+  "delay": 500
+}

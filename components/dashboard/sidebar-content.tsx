@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BarChart3, CreditCard, Inbox, Plus, Settings, User } from "lucide-react";
+import { BarChart3, CreditCard, Inbox, Plus, Settings, ThumbsUp, User } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ import type { Project } from "@/lib/types";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Leads", icon: Inbox },
+  { href: "/saved", label: "Saved", icon: ThumbsUp },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/billing", label: "Billing", icon: CreditCard },
   { href: "/account", label: "Account", icon: User },

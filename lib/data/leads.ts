@@ -1,7 +1,11 @@
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
-import { mockDigestLogs, mockLeads } from "@/lib/mock-data";
+import { mockDigestLogs, mockLeads, mockProjects } from "@/lib/mock-data";
 import type { DigestLogEntry, Lead, LeadStatus } from "@/lib/types";
 import type { DigestLog as PrismaDigestLog, Lead as PrismaLead } from "@prisma/client";
+
+export interface SavedLead extends Lead {
+  projectName: string;
+}
 
 export interface LeadFilters {
   userId: string;
@@ -59,6 +63,23 @@ export async function getLeads(filters: LeadFilters): Promise<Lead[]> {
     orderBy: filters.sort === "score" ? { score: "desc" } : { createdAt: "desc" },
   });
   return rows.map(toLead);
+}
+
+export async function getUsefulLeads(userId: string): Promise<SavedLead[]> {
+  if (!isDatabaseConfigured()) {
+    const projectNameById = new Map(mockProjects.map((p) => [p.id, p.name]));
+    return mockLeads
+      .filter((l) => l.status === "USEFUL")
+      .map((l) => ({ ...l, projectName: projectNameById.get(l.projectId) ?? "Unknown project" }))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  const rows = await getPrisma().lead.findMany({
+    where: { status: "USEFUL", project: { userId } },
+    include: { project: { select: { name: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+  return rows.map((row) => ({ ...toLead(row), projectName: row.project.name }));
 }
 
 export async function getDigestLogs(projectId: string, userId: string): Promise<DigestLogEntry[]> {
