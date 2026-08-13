@@ -13,6 +13,13 @@ Open http://localhost:3000 and sign in with the demo account shown on the login 
 (`demo@painscout.com` / `demo1234`). No API keys are required to explore the
 full product — every screen is fully functional and populated with realistic seeded data.
 
+Most code changes hot-reload instantly via Next.js's own Fast Refresh — `npm run dev` already
+handles that. The one thing it *doesn't* pick up automatically is editing `prisma/schema.prisma`,
+since that requires regenerating the Prisma Client and reloading the whole server process. Run
+`npm run dev:watch` instead of `npm run dev` if you're actively working on the schema — it wraps
+the dev server in [nodemon](https://nodemon.io) configured to watch only that file, regenerate the
+client, and restart on change.
+
 ## What's demo vs. what's real
 
 This is a complete implementation of the spec's full end-state SaaS, but it ships in

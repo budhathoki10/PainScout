@@ -44,8 +44,20 @@ const NOISE_PHRASES = [
   "[meme]",
   "shameless plug",
   "check out my",
+  "check my profile",
+  "claim today",
   "affiliate link",
+  "link in bio",
+  "passive income with automation",
+  "faceless youtube automation",
 ];
+
+// Bot/spam accounts append the same pipe-delimited list of buzzword phrases
+// ("Faceless YouTube automation| Best AI tools...| How to start...") to
+// otherwise-unrelated posts to farm keyword matches. Organic writing almost
+// never uses 3+ literal "|" separators, so this is a reliable structural tell
+// that doesn't depend on catching every specific phrase they rotate through.
+const MAX_PIPE_SEGMENTS = 2;
 
 export interface ScoredLead {
   post: BlueskyPost;
@@ -53,7 +65,12 @@ export interface ScoredLead {
   matchedKeywords: string[];
 }
 
-const MIN_SCORE_THRESHOLD = 35;
+// Any real post matching at least one tracked keyword clears this — spam and
+// noise are already rejected above by NOISE_PHRASES/MAX_PIPE_SEGMENTS, so
+// this floor exists only to drop the rare 0-signal edge case, not to require
+// complaint phrasing. Pain-phrase/question/length bonuses still raise the
+// score shown on each lead, which is what ranking and the digest email sort by.
+const MIN_SCORE_THRESHOLD = 20;
 
 // Bluesky search can surface old posts the first time a keyword matches
 // them — this isn't a "find it right now" signal at that point, so anything
@@ -71,6 +88,9 @@ export function scorePost(post: BlueskyPost, keywords: string[]): ScoredLead | n
 
   const isNoise = NOISE_PHRASES.some((p) => haystack.includes(p));
   if (isNoise) return null;
+
+  const pipeSegments = (post.text.match(/\|/g) ?? []).length;
+  if (pipeSegments > MAX_PIPE_SEGMENTS) return null;
 
   let score = 0;
   score += matchedKeywords.length * 20; // each distinct keyword hit

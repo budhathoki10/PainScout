@@ -11,6 +11,8 @@ interface LeadCardProps {
   lead: Lead;
   updating: boolean;
   onStatusChange: (status: LeadStatus) => void;
+  /** Shown when a lead is displayed outside its own project's page (e.g. a cross-project view). */
+  projectName?: string;
 }
 
 const SCORE_TIER = (score: number) =>
@@ -27,7 +29,7 @@ const STATUS_LABEL: Record<LeadStatus, string> = {
   CONTACTED: "Contacted",
 };
 
-export function LeadCard({ lead, updating, onStatusChange }: LeadCardProps) {
+export function LeadCard({ lead, updating, onStatusChange, projectName }: LeadCardProps) {
   const isUseful = lead.status === "USEFUL";
   const isContacted = lead.status === "CONTACTED";
   const isNotRelevant = lead.status === "NOT_RELEVANT";
@@ -42,6 +44,11 @@ export function LeadCard({ lead, updating, onStatusChange }: LeadCardProps) {
           </span>
         </div>
         <div className="flex items-center gap-2">
+          {projectName && (
+            <Badge variant="outline" className="text-[11px]">
+              {projectName}
+            </Badge>
+          )}
           {lead.status !== "NEW" && (
             <Badge variant="outline" className="text-[11px]">
               {STATUS_LABEL[lead.status]}
