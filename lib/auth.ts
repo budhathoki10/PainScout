@@ -1,18 +1,33 @@
 import NextAuth from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { authConfig } from "@/lib/auth.config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
-  // Only persists users/accounts when a real database is configured — without
-  // it, Google sign-in still works purely via JWT (no seeding, no persistence),
-  // which keeps the zero-config demo path alive for anyone cloning this repo.
-  adapter: isDatabaseConfigured() ? PrismaAdapter(getPrisma()) : undefined,
   callbacks: {
     ...authConfig.callbacks,
+    // No adapter — Google sign-in just upserts the User row by email on every
+    // token refresh. Simple, no Account-linking table, so there's no
+    // "OAuthAccountNotLinked" failure mode. Falls back to a pure-JWT session
+    // (no persistence) when no DATABASE_URL is set, keeping the demo path alive.
     async jwt({ token, user }) {
-      if (user?.id) token.id = user.id;
+      const email = user?.email ?? token.email;
+      if (email && isDatabaseConfigured()) {
+        const prisma = getPrisma();
+        const dbUser = await prisma.user.upsert({
+          where: { email },
+          update: {
+            name: user?.name ?? undefined,
+            image: user?.image ?? undefined,
+          },
+          create: {
+            email,
+            name: user?.name,
+            image: user?.image,
+          },
+        });
+        token.id = dbUser.id;
+      }
       return token;
     },
     async session({ session, token }) {

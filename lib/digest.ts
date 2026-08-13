@@ -1,6 +1,6 @@
 import type { ScoredLead } from "@/lib/filter";
 
-const MAX_DIGEST_LENGTH = 15;
+const MAX_DIGEST_LENGTH = 40;
 
 export interface DigestItem {
   postUri: string;

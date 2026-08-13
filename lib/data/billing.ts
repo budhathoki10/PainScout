@@ -1,11 +1,7 @@
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { mockAccount, mockBilling } from "@/lib/mock-data";
-import type { AccountInfo, BillingInfo, PlanTier } from "@/lib/types";
-
-const PLAN_LIMITS: Record<PlanTier, BillingInfo["limits"]> = {
-  FREE: { projects: 1, keywordsPerProject: 5, scansPerDay: 1 },
-  PRO: { projects: 999, keywordsPerProject: 999, scansPerDay: 2 },
-};
+import { PLAN_LIMITS, resolvePlan } from "@/lib/entitlements";
+import type { AccountInfo, BillingInfo } from "@/lib/types";
 
 export async function getBillingInfo(userId: string): Promise<BillingInfo> {
   if (!isDatabaseConfigured()) return mockBilling;
@@ -16,7 +12,7 @@ export async function getBillingInfo(userId: string): Promise<BillingInfo> {
     prisma.project.findMany({ where: { userId }, select: { keywords: true } }),
   ]);
 
-  const plan: PlanTier = subscription?.plan ?? "FREE";
+  const plan = resolvePlan(subscription);
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const scannedToday = await prisma.digestLog.count({

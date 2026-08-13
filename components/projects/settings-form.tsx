@@ -26,11 +26,17 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TagInput } from "@/components/tag-input";
-import type { Project } from "@/lib/types";
+import type { BillingInfo, Project } from "@/lib/types";
 
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
 
-export function ProjectSettingsForm({ project }: { project: Project }) {
+export function ProjectSettingsForm({
+  project,
+  limits,
+}: {
+  project: Project;
+  limits: BillingInfo["limits"];
+}) {
   const router = useRouter();
   const [name, setName] = useState(project.name);
   const [keywords, setKeywords] = useState(project.keywords);
@@ -39,6 +45,8 @@ export function ProjectSettingsForm({ project }: { project: Project }) {
   const [paused, setPaused] = useState(project.paused);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const twiceDailyIsPro = limits.scansPerDay < 2;
+  const keywordLimitReached = keywords.length >= limits.keywordsPerProject;
 
   async function handleSave() {
     setSaving(true);
@@ -92,7 +100,16 @@ export function ProjectSettingsForm({ project }: { project: Project }) {
 
           <div className="space-y-1.5">
             <Label>Tracked keywords</Label>
-            <TagInput value={keywords} onChange={setKeywords} placeholder="Add a keyword…" />
+            <TagInput
+              value={keywords}
+              onChange={setKeywords}
+              placeholder="Add a keyword…"
+              maxTags={limits.keywordsPerProject}
+            />
+            <p className="text-xs text-muted-foreground">
+              {keywords.length} / {limits.keywordsPerProject} keywords
+              {keywordLimitReached && limits.keywordsPerProject < 999 && " — upgrade to Pro for more"}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -114,9 +131,14 @@ export function ProjectSettingsForm({ project }: { project: Project }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="DAILY">Daily</SelectItem>
-                  <SelectItem value="TWICE_DAILY">Twice daily</SelectItem>
+                  <SelectItem value="TWICE_DAILY" disabled={twiceDailyIsPro}>
+                    Twice daily{twiceDailyIsPro ? " — Pro" : ""}
+                  </SelectItem>
                 </SelectContent>
               </Select>
+              {twiceDailyIsPro && (
+                <p className="text-xs text-muted-foreground">Upgrade to Pro to unlock twice-daily digests.</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label>Delivery time</Label>

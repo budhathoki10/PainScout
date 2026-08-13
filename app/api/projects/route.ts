@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { PLAN_LIMITS, getUserPlan } from "@/lib/entitlements";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -28,6 +29,24 @@ export async function POST(req: NextRequest) {
   }
 
   const prisma = getPrisma();
+  const plan = await getUserPlan(session.user.id);
+  const limits = PLAN_LIMITS[plan];
+
+  if (keywords.length > limits.keywordsPerProject) {
+    return NextResponse.json(
+      { error: `Free plan allows up to ${limits.keywordsPerProject} keywords per project. Upgrade to Pro for more.` },
+      { status: 403 },
+    );
+  }
+
+  const projectCount = await prisma.project.count({ where: { userId: session.user.id } });
+  if (projectCount >= limits.projects) {
+    return NextResponse.json(
+      { error: `Free plan allows up to ${limits.projects} project. Upgrade to Pro to create more.` },
+      { status: 403 },
+    );
+  }
+
   const project = await prisma.project.create({
     data: { userId: session.user.id, name, keywords },
   });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { scanProjectForLeads } from "@/lib/scan";
 import { sendDigestEmail } from "@/lib/email";
+import { PLAN_LIMITS, getUserPlan } from "@/lib/entitlements";
 
 export const dynamic = "force-dynamic";
 
@@ -14,9 +15,15 @@ function currentHourIn(timeZone: string): number {
   return Number(hourStr) % 24;
 }
 
-/** A project's target delivery hours, in its owner's timezone. */
-function deliveryHoursFor(project: { deliveryHour: number; frequency: string }): number[] {
-  return project.frequency === "TWICE_DAILY"
+/**
+ * A project's target delivery hours, in its owner's timezone. Twice-daily is
+ * a Pro feature — `allowTwiceDaily` re-checks the owner's *current* plan so
+ * a project set to TWICE_DAILY while on Pro correctly falls back to once a
+ * day if the owner later downgrades, even though the stored field doesn't
+ * change until they touch project settings again.
+ */
+function deliveryHoursFor(project: { deliveryHour: number; frequency: string }, allowTwiceDaily: boolean): number[] {
+  return project.frequency === "TWICE_DAILY" && allowTwiceDaily
     ? [project.deliveryHour, (project.deliveryHour + 12) % 24]
     : [project.deliveryHour];
 }
@@ -69,8 +76,11 @@ export async function POST(req: NextRequest) {
   for (const project of projects) {
     try {
       if (!force) {
+        const plan = await getUserPlan(project.userId);
+        const allowTwiceDaily = PLAN_LIMITS[plan].scansPerDay >= 2;
+
         const currentHour = currentHourIn(project.user.timezone);
-        if (!deliveryHoursFor(project).includes(currentHour)) {
+        if (!deliveryHoursFor(project, allowTwiceDaily).includes(currentHour)) {
           results.push({ project: project.name, scheduled: false, reason: "not this project's delivery hour" });
           continue;
         }
