@@ -22,6 +22,8 @@ export interface SendDigestArgs {
   timezone: string;
 }
 
+
+
 export async function sendDigestEmail({
   to,
   projectName,
