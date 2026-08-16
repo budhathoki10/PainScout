@@ -45,6 +45,9 @@ service:
 Nothing here is a stub pretending to be real — the pipeline code is production-shaped and
 works the moment the relevant env vars are filled in. The UI simply doesn't call it until then.
 
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how the scan → filter → rank → email
+pipeline actually works internally, including the delivery-hour gating and dedupe logic.
+
 ## Environment variables
 
 Copy `.env.example` to `.env` and fill in whichever sections you want to enable:
