@@ -1,10 +1,10 @@
-import { ListFilter, Mail, Radar } from "lucide-react";
+import { ListFilter, Mail, ScanEye } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { StepConnector } from "@/components/landing/step-connector";
 
 const STEPS = [
   {
-    icon: Radar,
+    icon: ScanEye,
     title: "Tell it what to watch",
     description:
       "Pick the keywords that represent the problem you solve — \"invoicing\", \"uptime monitoring\", whatever fits your niche.",

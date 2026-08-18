@@ -11,10 +11,6 @@ export function Hero() {
     <section className="relative overflow-hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 -top-40 -z-10 h-[480px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent)]"
-      />
-      <div
-        aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 opacity-[0.03] mix-blend-overlay"
         style={{
           backgroundImage:
@@ -36,7 +32,7 @@ export function Hero() {
           </h1>
 
           <p className="mt-5 max-w-lg text-lg text-muted-foreground text-pretty">
-            Pain Scout watches Bluesky for the keywords you choose, filters out the noise, and emails
+            Feedwatch watches Bluesky for the keywords you choose, filters out the noise, and emails
             you a ranked digest of people already complaining about the problem you solve.
           </p>
 

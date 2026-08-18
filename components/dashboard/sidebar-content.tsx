@@ -33,7 +33,7 @@ export function SidebarContent({
   return (
     <div className="flex h-full flex-col">
       <div className={cn("flex items-center px-4 py-5", collapsed && "justify-center px-0")}>
-        <Link href="/dashboard" onClick={onNavigate} aria-label="Pain Scout">
+        <Link href="/dashboard" onClick={onNavigate} aria-label="Feedwatch">
           <Logo iconOnly={collapsed} />
         </Link>
       </div>

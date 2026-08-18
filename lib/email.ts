@@ -32,7 +32,7 @@ export async function sendDigestEmail({
   timezone,
 }: SendDigestArgs) {
   const resend = getResendClient();
-  const from = process.env.RESEND_FROM_EMAIL ?? "Pain Scout <digest@resend.dev>";
+  const from = process.env.RESEND_FROM_EMAIL ?? "Feedwatch <digest@resend.dev>";
 
   return resend.emails.send({
     from,

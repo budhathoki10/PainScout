@@ -54,7 +54,7 @@ export default function DigestEmail({ projectName, leads, totalCount, dashboardU
       <Body style={{ backgroundColor: "#f4f4f5", fontFamily: "Helvetica, Arial, sans-serif", margin: 0, padding: "32px 0" }}>
         <Container style={{ backgroundColor: "#ffffff", borderRadius: 12, maxWidth: 560, padding: 32, margin: "0 auto" }}>
           <Text style={{ fontSize: 13, fontWeight: 700, color: ACCENT, letterSpacing: 0.4, textTransform: "uppercase", margin: "0 0 8px" }}>
-            Pain Scout
+            Feedwatch
           </Text>
           <Heading style={{ fontSize: 20, color: INK, margin: "0 0 4px" }}>
             {totalCount === 0 ? `No new leads for ${projectName}` : `${totalCount} new lead${totalCount === 1 ? "" : "s"} for ${projectName}`}
@@ -99,7 +99,7 @@ export default function DigestEmail({ projectName, leads, totalCount, dashboardU
             Open dashboard
           </Link>
           <Text style={{ fontSize: 12, color: MUTED, marginTop: 24 }}>
-            You&apos;re receiving this because you have an active project on Pain Scout.
+            You&apos;re receiving this because you have an active project on Feedwatch.
           </Text>
         </Container>
       </Body>

@@ -1,4 +1,4 @@
-# Pain Scout
+# Feedwatch
 
 Scans Bluesky for the keywords you choose, filters out the noise, and emails you a ranked
 daily digest of people already complaining about the problem you solve.

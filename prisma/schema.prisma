@@ -1,4 +1,4 @@
-// Pain Scout — data model
+// Feedwatch — data model
 // MongoDB via Prisma. Requires DATABASE_URL (MongoDB connection string) to migrate/run.
 // See lib/prisma.ts for why this is safe to leave unconfigured in the demo build.
 
