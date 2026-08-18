@@ -17,10 +17,10 @@ interface LeadCardProps {
 
 const SCORE_TIER = (score: number) =>
   score >= 85
-    ? "border-primary/30 bg-primary/10 text-primary"
+    ? { text: "text-primary", border: "border-l-primary" }
     : score >= 60
-      ? "border-warning/30 bg-warning/10 text-warning"
-      : "border-border bg-muted text-muted-foreground";
+      ? { text: "text-warning", border: "border-l-warning" }
+      : { text: "text-muted-foreground", border: "border-l-border" };
 
 const STATUS_LABEL: Record<LeadStatus, string> = {
   NEW: "New",
@@ -33,35 +33,45 @@ export function LeadCard({ lead, updating, onStatusChange, projectName }: LeadCa
   const isUseful = lead.status === "USEFUL";
   const isContacted = lead.status === "CONTACTED";
   const isNotRelevant = lead.status === "NOT_RELEVANT";
+  const tier = SCORE_TIER(lead.score);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-primary">@{lead.authorHandle}</span>
-          <span className="text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
-          </span>
+    <div
+      className={cn(
+        "rounded-xl border border-l-2 border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md",
+        tier.border,
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-primary">@{lead.authorHandle}</span>
+            <span className="text-xs text-muted-foreground">
+              {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
+            </span>
+          </div>
+          {(projectName || lead.status !== "NEW") && (
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              {projectName && (
+                <Badge variant="outline" className="text-[11px]">
+                  {projectName}
+                </Badge>
+              )}
+              {lead.status !== "NEW" && (
+                <Badge variant="outline" className="text-[11px]">
+                  {STATUS_LABEL[lead.status]}
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          {projectName && (
-            <Badge variant="outline" className="text-[11px]">
-              {projectName}
-            </Badge>
-          )}
-          {lead.status !== "NEW" && (
-            <Badge variant="outline" className="text-[11px]">
-              {STATUS_LABEL[lead.status]}
-            </Badge>
-          )}
-          <span
-            className={cn(
-              "rounded-full border px-2 py-0.5 text-[11px] font-semibold tabular-nums",
-              SCORE_TIER(lead.score),
-            )}
-          >
-            {Math.round(lead.score)}% match
-          </span>
+        <div className="shrink-0 text-right">
+          <div className={cn("text-lg leading-none font-semibold tabular-nums", tier.text)}>
+            {Math.round(lead.score)}
+          </div>
+          <div className="mt-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+            match
+          </div>
         </div>
       </div>
 

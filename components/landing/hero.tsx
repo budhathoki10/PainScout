@@ -32,7 +32,7 @@ export function Hero() {
           </Badge>
 
           <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-[3.25rem] lg:leading-[1.08] xl:text-6xl">
-            Find your next customer <span className="text-primary">before they find you</span>
+            Spot potential leads <span className="text-primary">before the noise buries them</span>
           </h1>
 
           <p className="mt-5 max-w-lg text-lg text-muted-foreground text-pretty">
@@ -42,10 +42,7 @@ export function Hero() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Magnetic className="inline-block">
-              {/* TEST ONLY — literal think-like-senior-developer spec (48px / 12px radius)
-                  isolated to this one button via override classes, for comparison against
-                  the project's own xl (44px / 10px) elsewhere. Not applied anywhere else. */}
-              <Button size="xl" className="h-12 gap-2 rounded-[12px] px-6" asChild>
+              <Button size="xl" asChild>
                 <Link href="/signup">
                   Get started free <ArrowRight className="size-4" />
                 </Link>
