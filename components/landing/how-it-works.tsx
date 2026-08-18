@@ -1,10 +1,10 @@
-import { ListFilter, Mail, Radar } from "lucide-react";
+import { ListFilter, Mail, ScanEye } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { StepConnector } from "@/components/landing/step-connector";
 
 const STEPS = [
   {
-    icon: Radar,
+    icon: ScanEye,
     title: "Tell it what to watch",
     description:
       "Pick the keywords that represent the problem you solve — \"invoicing\", \"uptime monitoring\", whatever fits your niche.",
@@ -40,7 +40,7 @@ export function HowItWorks() {
           <StepConnector />
           <Reveal as="div" stagger={0.15} y={28} className="grid gap-8 sm:grid-cols-3">
             {STEPS.map((step, i) => (
-              <div key={step.title} className="relative flex flex-col items-center text-center sm:items-start sm:text-left">
+              <div key={step.title} className="relative flex flex-col items-center text-center">
                 <div className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card shadow-sm">
                   <step.icon className="size-5 text-primary" strokeWidth={2} />
                 </div>

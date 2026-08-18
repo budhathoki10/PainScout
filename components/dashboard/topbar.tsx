@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { LogOut, Menu, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,22 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarContent } from "@/components/dashboard/sidebar-content";
+import { CommandMenu } from "@/components/dashboard/command-menu";
 import type { Project } from "@/lib/types";
+
+const PAGE_TITLES: { prefix: string; label: string }[] = [
+  { prefix: "/dashboard", label: "Leads" },
+  { prefix: "/saved", label: "Saved leads" },
+  { prefix: "/analytics", label: "Analytics" },
+  { prefix: "/billing", label: "Billing" },
+  { prefix: "/account", label: "Account" },
+  { prefix: "/projects", label: "Project settings" },
+];
+
+function usePageTitle() {
+  const pathname = usePathname();
+  return PAGE_TITLES.find((item) => pathname.startsWith(item.prefix))?.label;
+}
 
 interface TopbarProps {
   projects: Project[];
@@ -26,6 +42,7 @@ interface TopbarProps {
 
 export function Topbar({ projects, userName, userEmail, userImage }: TopbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pageTitle = usePageTitle();
   const initials = userName
     .split(" ")
     .map((p) => p[0])
@@ -34,22 +51,27 @@ export function Topbar({ projects, userName, userEmail, userImage }: TopbarProps
     .toUpperCase();
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border px-4 sm:px-6">
-      <div className="flex items-center gap-2 lg:hidden">
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <Button variant="ghost" size="icon" aria-label="Open navigation" onClick={() => setMobileOpen(true)}>
-            <Menu className="size-5" />
-          </Button>
-          <SheetContent side="left" className="w-72 p-0">
-            <SheetTitle className="sr-only">Navigation</SheetTitle>
-            <SidebarContent projects={projects} onNavigate={() => setMobileOpen(false)} />
-          </SheetContent>
-        </Sheet>
+    <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-border px-4 sm:px-6">
+      <div className="flex min-w-0 items-center gap-1.5">
+        <div className="lg:hidden">
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <Button variant="ghost" size="icon" aria-label="Open navigation" onClick={() => setMobileOpen(true)}>
+              <Menu className="size-5" />
+            </Button>
+            <SheetContent side="left" className="w-72 p-0">
+              <SheetTitle className="sr-only">Navigation</SheetTitle>
+              <SidebarContent projects={projects} onNavigate={() => setMobileOpen(false)} />
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {pageTitle && (
+          <h2 className="truncate text-sm font-medium text-foreground/90">{pageTitle}</h2>
+        )}
       </div>
 
-      <div className="hidden lg:block" />
-
       <div className="flex items-center gap-1.5">
+        <CommandMenu projects={projects} />
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

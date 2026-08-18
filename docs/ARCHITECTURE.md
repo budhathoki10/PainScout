@@ -1,6 +1,6 @@
 # Architecture: the scan → filter → rank → email pipeline
 
-This doc explains how Pain Scout turns a project's keyword list into a ranked
+This doc explains how Feedwatch turns a project's keyword list into a ranked
 digest email. It's the internal counterpart to the [README](../README.md)'s
 demo-vs-live table — read this when you need to change *how* leads are found,
 scored, or delivered, not just whether a feature is wired up.

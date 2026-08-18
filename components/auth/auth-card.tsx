@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Radar } from "lucide-react";
+import { ScanEye } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AuthCardProps {
@@ -26,7 +26,7 @@ export function AuthCard({
           href="/"
           className="flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm transition-transform hover:scale-105"
         >
-          <Radar className="size-7" strokeWidth={2.2} />
+          <ScanEye className="size-7" strokeWidth={2.2} />
         </Link>
         <CardTitle className="mt-5 text-2xl">{title}</CardTitle>
         <CardDescription className="mt-1.5 text-base text-pretty">{description}</CardDescription>

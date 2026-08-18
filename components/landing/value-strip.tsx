@@ -1,4 +1,4 @@
-import { Clock, Filter, Radar, Zap } from "lucide-react";
+import { Clock, Filter, ScanEye, Zap } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 import { Counter } from "@/components/motion/counter";
 import { Marquee } from "@/components/motion/marquee";
@@ -19,15 +19,15 @@ export function ValueStrip() {
             </span>
             <p className="mt-4 text-3xl font-semibold tracking-tight text-balance">Get your time back</p>
             <p className="mt-1.5 max-w-sm text-sm text-muted-foreground text-pretty">
-              Pain Scout scans Bluesky continuously and filters out the noise — so you don&apos;t have to
+              Feedwatch scans Bluesky continuously and filters out the noise — so you don&apos;t have to
               scroll for it.
             </p>
-            <Radar className="pointer-events-none absolute -right-6 -bottom-6 size-28 text-primary/[0.06]" strokeWidth={1} />
+            <ScanEye className="pointer-events-none absolute -right-6 -bottom-6 size-28 text-primary/[0.06]" strokeWidth={1} />
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-6">
             <span className="flex size-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-              <Radar className="size-5" />
+              <ScanEye className="size-5" />
             </span>
             <p className="mt-4 text-3xl font-semibold tracking-tight">
               <Counter to={20} suffix="+" />
@@ -53,7 +53,7 @@ export function ValueStrip() {
                 </span>
                 <div>
                   <p className="text-sm font-semibold">Watching right now</p>
-                  <p className="text-sm text-muted-foreground">A sample of keywords founders track with Pain Scout</p>
+                  <p className="text-sm text-muted-foreground">A sample of keywords founders track with Feedwatch</p>
                 </div>
               </div>
             </div>

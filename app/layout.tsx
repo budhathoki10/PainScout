@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "@/components/session-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { AppGlow } from "@/components/app-glow";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,11 +19,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Pain Scout — Find your next customers on Bluesky",
-    template: "%s · Pain Scout",
+    default: "Feedwatch — Watch Bluesky for the keywords you choose",
+    template: "%s · Feedwatch",
   },
   description:
-    "Pain Scout scans Bluesky for the keywords you choose to find genuine pain points and emails you a ranked daily digest of warm leads.",
+    "Feedwatch scans Bluesky for the keywords you choose, filters out the noise, and emails you a ranked daily digest of matching posts.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <AppGlow />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

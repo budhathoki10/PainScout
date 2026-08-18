@@ -24,7 +24,7 @@ export const DEMO_USER_ID = "demo-user-1";
 
 export const mockAccount: AccountInfo = {
   name: "Alex Rivera",
-  email: "demo@painscout.com",
+  email: "demo@feedwatch.com",
   image: null,
   timezone: "America/New_York",
   emailDigestOn: true,

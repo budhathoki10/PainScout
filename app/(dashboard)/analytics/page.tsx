@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CheckCircle2, Mail, Radar, TrendingUp } from "lucide-react";
+import { CheckCircle2, Mail, ScanEye, TrendingUp } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getProjects } from "@/lib/data/projects";
 import { getLeads } from "@/lib/data/leads";
@@ -47,7 +47,7 @@ export default async function AnalyticsPage({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={Radar} label="Matches (14d)" value={totalMatches} />
+        <StatCard icon={ScanEye} label="Matches (14d)" value={totalMatches} />
         <StatCard
           icon={CheckCircle2}
           label="Marked useful"
