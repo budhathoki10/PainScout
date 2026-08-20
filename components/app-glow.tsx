@@ -6,45 +6,46 @@ import { gsap, prefersReducedMotion, registerGsapPlugins } from "@/lib/motion";
 
 registerGsapPlugins();
 
-/**
- * Ambient glow, fixed to the viewport so it's visible behind every page.
- * Drifts along a gentle arc from bottom-left to top-right as the page
- * scrolls, with a scrub lag so it keeps gliding after scrolling stops —
- * that lazy catch-up is what reads as "cloud" instead of "slider".
- * Positions stay within 0–100%; going past that edge causes a hard
- * clipping seam where the gradient box cuts off.
- */
+/** A soft ambient cloud that drifts slowly from bottom-left to top-right. */
 export function AppGlow() {
   const glowRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
       if (!glowRef.current || prefersReducedMotion()) return;
-      gsap.set(glowRef.current, { "--gx": "0%", "--gy": "100%" });
 
-      gsap
-        .timeline({
+      gsap.fromTo(
+        glowRef.current,
+        { x: 0, y: 0 },
+        {
+          x: () => window.innerWidth * 0.78,
+          y: () => -window.innerHeight * 0.76,
+          ease: "none",
           scrollTrigger: {
             trigger: document.body,
             start: "top top",
-            end: "+=800",
-            scrub: 1.2,
+            end: () => {
+              const availableScroll = document.documentElement.scrollHeight - window.innerHeight;
+              return `+=${Math.min(2200, Math.max(1, availableScroll))}`;
+            },
+            scrub: 2.4,
+            invalidateOnRefresh: true,
           },
-        })
-        .to(glowRef.current, { "--gx": "25%", "--gy": "70%", ease: "sine.inOut" })
-        .to(glowRef.current, { "--gx": "50%", "--gy": "45%", ease: "sine.inOut" })
-        .to(glowRef.current, { "--gx": "75%", "--gy": "25%", ease: "sine.inOut" })
-        .to(glowRef.current, { "--gx": "100%", "--gy": "0%", ease: "sine.inOut" });
+        },
+      );
     },
     { scope: glowRef },
   );
 
   return (
-    <div
-      ref={glowRef}
-      aria-hidden
-      style={{ "--gx": "0%", "--gy": "100%" } as React.CSSProperties}
-      className="pointer-events-none fixed inset-0 -z-10 blur-[70px] bg-[radial-gradient(circle_420px_at_var(--gx)_var(--gy),color-mix(in_oklch,var(--primary)_20%,transparent),transparent)]"
-    />
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div
+        ref={glowRef}
+        className="absolute -bottom-48 -left-40 h-[32rem] w-[38rem] max-w-[90vw] will-change-transform"
+      >
+        <div className="absolute inset-0 rounded-[48%] bg-primary/[0.08] blur-[100px] dark:bg-primary/[0.06]" />
+        <div className="absolute top-16 right-4 h-72 w-80 rounded-[52%] bg-primary/[0.05] blur-[80px] dark:bg-primary/[0.04]" />
+      </div>
+    </div>
   );
 }

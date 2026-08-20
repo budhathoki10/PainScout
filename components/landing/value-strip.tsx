@@ -22,7 +22,7 @@ export function ValueStrip() {
               Feedwatch scans Bluesky continuously and filters out the noise — so you don&apos;t have to
               scroll for it.
             </p>
-            <ScanEye className="pointer-events-none absolute -right-6 -bottom-6 size-28 text-primary/[0.06]" strokeWidth={1} />
+           
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-6">
